@@ -1,0 +1,18 @@
+<main>
+    <h1>Welcome!</h1>
+    <p>
+        Welcome to <b>Game Vault Con</b>! This is a virtual convention for playing tabletop and board games together.
+    </p>
+    <p>
+        <% if (user) { %>
+            <ul>
+                <li>You are logged in as <%- include("inline-user", user) %></li>
+                <li>See your <a href="/schedule">schedule</a></li>
+                <li>See <a href="/games">all games</a></li>
+                <li><a href="/logout">Log out</a> to switch accounts</li>
+            </ul>
+        <% } else { %>
+            <a href="/login">Log in</a> to get started.
+        <% } %>
+    </p>
+</main>
