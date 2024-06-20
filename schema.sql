@@ -11,7 +11,7 @@ create table users (
 
     refresh_token text not null,
 
-    created_at timestamp not null default current_timestamp
+    created_at integer not null default (unixepoch())
 );
 
 create table games (
@@ -19,23 +19,39 @@ create table games (
     slug text unique not null,
 
     name text not null,
-    summary text not null,
-    description text not null,
+    summary text not null default '',
+    description text not null default '',
+
+    min_players integer default 0,
+    max_players integer default 10,
+
+    content_warnings text default '',
+    custom_content_warnings text default '',
 
     organizer integer not null references users(id),
 
-    created_at timestamp not null default current_timestamp
+    created_at integer not null default (unixepoch())
+);
+
+create table game_times (
+    id integer primary key,
+
+    game integer not null references games(id),
+    start integer not null,
+    end integer not null,
+
+    created_at integer not null default (unixepoch())
 );
 
 create table entries (
     id integer primary key,
 
-    game integer not null references games(id),
+    game_time integer not null references game_times(id),
     user integer not null references users(id),
 
     priority integer not null default 0,
 
-    created_at timestamp not null default current_timestamp
+    created_at integer not null default (unixepoch())
 );
 
 create table sessions (
@@ -43,5 +59,7 @@ create table sessions (
 
     sid text not null,
     sess text not null,
-    user_id integer not null references users(id)
+    user_id integer not null references users(id),
+
+    created_at integer not null default (unixepoch())
 );

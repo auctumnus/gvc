@@ -1,0 +1,60 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<main>
+    <h1>Editing <%= game.name %></h1>
+    <form action="/games/<%= game.slug %>/edit" method="post">
+        <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required value="<%= game.name %>" />
+        </div>
+        <div>
+            <label for="summary">Summary</label>
+            <p>This appears as a short description of the game - aim for 10 words or fewer.</p>
+            <input type="text" id="summary" name="summary" value="<%= game.summary %>" />
+        </div>
+        <div>
+            <label for="description">Description</label>
+            <p>This appears as a longer description of the game. Markdown is allowed.</p>
+            <textarea class="mde" id="description" name="description" value="<%= game.description %>"></textarea>
+        </div>
+        <div>
+            <label for="contentWarnings">Content warnings</label>
+            <p>What should players be aware of before joining this game?</p>
+            <select id="contentWarnings" name="contentWarnings" multiple>
+                <option value="violence" <% if(game.content_warnings?.includes('violence')) { %>selected<%}%> >Violence</option>
+                <option value="sexual-content" <% if(game.content_warnings?.includes('sexual-content')) { %>selected<%}%>>Sexual content</option>
+                <option value="body-horror" <% if(game.content_warnings?.includes('body-horror')) { %>selected<%}%>>Body horror</option>
+                <option value="existential-horror" <% if(game.content_warnings?.includes('existential-horror')) { %>selected<%}%>>Existential horror</option>
+            </select>
+        </div>
+        <div>
+            <label for="customContentWarning">Other content warnings</label>
+            <p>Anything not covered by the selector above.</p>
+            <input type="text" id="customContentWarning" name="customContentWarning" value="<%= game.custom_content_warnings %>" />
+        </div>
+        <div>
+            <label for="minPlayers">Minimum players</label>
+            <input type="number" id="minPlayers" name="minPlayers" value="<%= game.min_players %>" />
+        </div>
+        <div>
+            <label for="maxPlayers">Maximum players</label>
+            <input type="number" id="maxPlayers" name="maxPlayers" value="<%= game.max_players %>" />
+        </div>
+        <input type="submit" value="Save changes" />
+    </form>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const simplemde = new SimpleMDE({
+            element: document.querySelector('textarea.mde'),
+            spellChecker: false,
+            status: false,
+            toolbar: [
+                'bold', 'italic', 'heading', '|',
+                'quote', 'unordered-list', 'ordered-list', '|',
+                'link', 'image', 'table', '|',
+                'preview', 'side-by-side', 'fullscreen'
+            ]
+        });
+    });
+</script>

@@ -1,0 +1,45 @@
+<main>
+    <h1><%= game.name %></h1>
+    <div>Run by <%- include("inline-user", organizer) %></div>
+    <h2>Content warnings</h2>
+    <p>This game may include the following:</p>
+    <ul>
+        <% if(game.content_warnings.includes("violence")) { %>
+            <li>Violence</li>
+        <% } %>
+        <% if(game.content_warnings.includes("sexual-content")) { %>
+            <li>Sexual content</li>
+        <% } %>
+        <% if(game.content_warnings.includes("body-horror")) { %>
+            <li>Body horror</li>
+        <% } %>
+        <% if(game.content_warnings.includes("existential-horror")) { %>
+            <li>Existential horror</li>
+        <% } %>
+        <% if(game.custom_content_warnings) { %>
+            <li><%= game.custom_content_warnings %></li>
+        <% } %>
+    </ul>
+    <h2>About this game</h2>
+    <p><%- game.description %></p>
+    <h2>Game times</h2>
+    <noscript>Times in UTC.</noscript>
+    <table>
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Players</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% gameTimes.forEach(gt => { %>
+                <tr class="<% if(gt.num_entries >= game.max_players) {%>full<% } %>">
+                    <td><time><%= gt.start.toUTCString() %></time></td>
+                    <td><time><%= gt.end.toUTCString() %></time></td>
+                    <td><%= gt.num_entries %>/<%= game.max_players %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</main>

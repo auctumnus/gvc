@@ -1,0 +1,29 @@
+<main>
+    <h1>Games</h1>
+    <% if (user.organizer || user.admin) { %>
+        <p><a href="/games/new">Create a new game</a></p>
+    <% } %>
+    <% if (games.length === 0) { %>
+        <p>No games :(</p>
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Summary</th>
+                    <th>Organizer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% games.forEach(({ game }) => { %>
+                    <tr>
+                        <td><a href="/games/<%= game.slug %>"><%= game.name %></a></td>
+                        <td><%= game.summary %></td>
+                        <td><%- include("inline-user", game.organizer) %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+    
+</main>
