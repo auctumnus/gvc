@@ -1,40 +1,35 @@
 interface Event {
-    id: number;
-    start: Date;
-    time: Date;
-    maximumPlayers: number;
+  id: number;
+  start: Date;
+  length: Date;
+  maximumPlayers: number;
+  minimumPlayers: number;
 }
 
 interface Entry {
-    id: number;
-    eventId: number;
-    priority: number;
-    createdAt: Date;
+  id: number;
+  playerId: number;
+  eventId: number;
+  priority: number;
+  createdAt: Date;
 }
 
 interface SolvedEvent {
-    event: Event;
-    entries: Entry[];
+  event: Event;
+  entries: Entry[];
 }
 
 interface UnsolvedSchedule {
-    events: Event[];
-    entries: Entry[];
+  events: Event[];
+  entries: Entry[];
 }
 
 type SolvedSchedule = SolvedEvent[];
 
-const solve = (schedule: UnsolvedSchedule): SolvedSchedule => {
-    const events = structuredClone(schedule.events).sort((a, b) => a.time.getTime() - b.time.getTime());
-    const entries = structuredClone(schedule.entries).sort((a, b) => a.priority - b.priority).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+/*
+A schedule is a list of Events E1, E2, ..., En, where each event has a start time, length, and max/min number of players,
+as well as a list of Entries N1, N2, ..., Nm, where each entry has a player ID, an event it is associated with, a priority,
+and the time it was made.
 
 
-    const solved: SolvedSchedule = [];
-    for (const event of events) {
-        const eventEntries = entries.filter((entry) => entry.eventId === event.id);
-        solved.push({ event, entries: eventEntries });
-    }
-
-    return solved;
-}
-
+*/

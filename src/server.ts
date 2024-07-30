@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import "dotenv/config";
 import express from "express";
 import {
   STATIC_DIR,
@@ -11,7 +11,7 @@ import { pinoHttp as logger } from "pino-http";
 import { router } from "./routes";
 import { renderer } from "./view";
 import session from "express-session";
-import { SessionStore } from './session-store';
+import { SessionStore } from "./session-store";
 
 const app = express();
 
@@ -27,11 +27,12 @@ app.use(
     cookie: {
       secure: IS_PROD,
     },
-    store: new SessionStore()
+    store: new SessionStore(),
   }),
 );
 app.use(renderer);
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(router);
 
 app.listen(PORT, () => {

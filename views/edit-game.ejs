@@ -1,7 +1,18 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <main>
     <h1>Editing <%= game.name %></h1>
+    <% if(error) { %>
+        <div class="form-error">
+            <%= error %>
+        </div>
+    <% } %>
+    <a href="/games/<%= game.slug %>">Back to game page</a>
+    <a href="/games/<%= game.slug %>/times">Add times for this game</a>
     <form action="/games/<%= game.slug %>/edit" method="post">
         <div>
             <label for="name">Name</label>
@@ -18,27 +29,39 @@
             <textarea class="mde" id="description" name="description" value="<%= game.description %>"></textarea>
         </div>
         <div>
-            <label for="contentWarnings">Content warnings</label>
+            <label for="content_warnings">Content warnings</label>
             <p>What should players be aware of before joining this game?</p>
-            <select id="contentWarnings" name="contentWarnings" multiple>
-                <option value="violence" <% if(game.content_warnings?.includes('violence')) { %>selected<%}%> >Violence</option>
-                <option value="sexual-content" <% if(game.content_warnings?.includes('sexual-content')) { %>selected<%}%>>Sexual content</option>
-                <option value="body-horror" <% if(game.content_warnings?.includes('body-horror')) { %>selected<%}%>>Body horror</option>
-                <option value="existential-horror" <% if(game.content_warnings?.includes('existential-horror')) { %>selected<%}%>>Existential horror</option>
+            <noscript>
+                You should enable Javascript to input content warnings (multiple-select is not very good in HTML alone).
+                <br />
+                <details>
+                    <summary>Full list of options</summary>
+                    <ul>
+                        <% allowedContentWarnings.forEach(cw => {%>
+                            <li><%= cw %></li>
+                        <% }) %>
+                    </ul>
+                </details>
+                Separate each option with a comma.
+            </noscript>
+            <select class="multiselect" name="content_warnings[]" multiple>
+                <% allowedContentWarnings.forEach(cw => {%>
+                    <option value="<%= cw %>"><%= cw %></option>
+                <% }) %>
             </select>
         </div>
         <div>
-            <label for="customContentWarning">Other content warnings</label>
+            <label for="custom_content_warning">Other content warnings</label>
             <p>Anything not covered by the selector above.</p>
-            <input type="text" id="customContentWarning" name="customContentWarning" value="<%= game.custom_content_warnings %>" />
+            <input type="text" id="custom_contentWarning" name="custom_content_warning" value="<%= game.custom_content_warnings %>" />
         </div>
         <div>
-            <label for="minPlayers">Minimum players</label>
-            <input type="number" id="minPlayers" name="minPlayers" value="<%= game.min_players %>" />
+            <label for="min_players">Minimum players</label>
+            <input type="number" id="min_players" name="min_players" value="<%= game.min_players %>" />
         </div>
         <div>
-            <label for="maxPlayers">Maximum players</label>
-            <input type="number" id="maxPlayers" name="maxPlayers" value="<%= game.max_players %>" />
+            <label for="max_players">Maximum players</label>
+            <input type="number" id="max_players" name="max_players" value="<%= game.max_players %>" />
         </div>
         <input type="submit" value="Save changes" />
     </form>
@@ -56,5 +79,6 @@
                 'preview', 'side-by-side', 'fullscreen'
             ]
         });
+        $('.multiselect').select2()
     });
 </script>

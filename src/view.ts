@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { DISCORD_OAUTH_URL } from "./constants";
+import { DISCORD_OAUTH_URL, START_OF_CON, END_OF_CON } from "./constants";
 
 export const render = (
   req: Request,
@@ -14,6 +14,8 @@ export const render = (
     authorized,
     user: authorized ? req.session.user : null,
     login_url: DISCORD_OAUTH_URL,
+    START_OF_CON: START_OF_CON,
+    END_OF_CON: END_OF_CON,
   });
 };
 

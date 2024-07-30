@@ -1,10 +1,32 @@
 <main>
     <h1>Games</h1>
-    <% if (user.organizer || user.admin) { %>
-        <p><a href="/games/new">Create a new game</a></p>
+    <% if (user?.organizer || user?.admin) { %>
+        <p><a href="/games/new" class="button">Create a new game</a></p>
     <% } %>
+
+    <details>
+        <summary>Search</summary>
+        <form action="/games" method="get">
+            <label for="entered">Entered</label>
+            <select name="entered" id="entered">
+                <option value="">All games</option>
+                <option value="true" <%= filter.entered === true ? 'selected' : '' %>>Games I entered</option>
+                <option value="false" <%= filter.entered === false ? 'selected' : '' %>>Games I haven't entered</option>
+            </select>
+            <label for="running">Running</label>
+            <select name="running" id="running" value="<%= filter.running || '' %>">
+                <option value="">All games</option>
+                <option value="true" <%= filter.running === true ? 'selected' : '' %>>Games I'm running</option>
+                <option value="false" <%= filter.running === true ? 'selected' : '' %>>Games I'm not running</option>
+            </select>
+            <label for="text">In text</label>
+            <input type="text" name="text" id="text" value="<%= filter.text %>" />
+            <input type="submit" value="Search"></input>
+        </form>
+    </details>
+
     <% if (games.length === 0) { %>
-        <p>No games :(</p>
+        <p>No games <%= hasFilter ? 'found while using this filter' : '' %> :(</p>
     <% } else { %>
         <table>
             <thead>

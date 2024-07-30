@@ -32,16 +32,13 @@ const getAvatar = (user: DiscordUser) =>
 
 export const getUser = async (oauthCode: string) => {
   const tokenResponseData = await getOauthData(oauthCode);
-  console.log(tokenResponseData);
   const oauthData = await tokenResponseData.json();
-  console.log(oauthData);
   const userResult = await fetch("https://discord.com/api/users/@me", {
     headers: {
       authorization: `${oauthData.token_type} ${oauthData.access_token}`,
     },
   });
   const body = await userResult.json();
-  console.log(body);
   const { id } = body;
   if (!id) {
     throw new Error("No ID found on user.");

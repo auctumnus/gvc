@@ -28,7 +28,7 @@ create table games (
     content_warnings text default '',
     custom_content_warnings text default '',
 
-    organizer integer not null references users(id),
+    organizer integer not null references users(id) on delete cascade,
 
     created_at integer not null default (unixepoch())
 );
@@ -36,7 +36,7 @@ create table games (
 create table game_times (
     id integer primary key,
 
-    game integer not null references games(id),
+    game integer not null references games(id) on delete cascade,
     start integer not null,
     end integer not null,
 
@@ -46,10 +46,11 @@ create table game_times (
 create table entries (
     id integer primary key,
 
-    game_time integer not null references game_times(id),
-    user integer not null references users(id),
+    game_time integer not null references game_times(id) on delete cascade,
+    user integer not null references users(id) on delete cascade,
 
     priority integer not null default 0,
+    accepted boolean not null default false,
 
     created_at integer not null default (unixepoch())
 );
@@ -59,7 +60,7 @@ create table sessions (
 
     sid text not null,
     sess text not null,
-    user_id integer not null references users(id),
+    user_id integer not null references users(id) on delete cascade,
 
     created_at integer not null default (unixepoch())
 );

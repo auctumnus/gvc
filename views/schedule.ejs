@@ -1,0 +1,19 @@
+<script src="/js/calendar.js" type="module"></script>
+<link rel="stylesheet" href="/css/calendar.css" />
+<script id="game-times-data" type="application/json">
+    {
+        "current": [],
+        "running": <%- JSON.stringify(otherRanGameTimes) %>,
+        "entered": <%- JSON.stringify(enteredGameTimes) %>,
+        "other": <%- JSON.stringify(otherGameTimes) %>,
+        "endOfCon": <%- END_OF_CON.valueOf() %>,
+        "startOfCon": <%- START_OF_CON.valueOf() %>,
+        "minPlayers": 0,
+        "maxPlayers": 0
+    }
+</script>
+<main>
+    <h1>Schedule</h1>
+    
+    <div id="app"></div>
+</main>

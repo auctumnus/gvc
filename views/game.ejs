@@ -1,21 +1,52 @@
-<main>
+<script src="/js/display-time.js" type="module"></script>
+<script src="/js/calendar.js" type="module"></script>
+<link rel="stylesheet" href="/css/calendar.css" />
+<script id="game-times-data" type="application/json">
+    {
+        "current": <%- JSON.stringify(currentGameTimes) %>,
+        "running": <%- JSON.stringify(otherRanGameTimes) %>,
+        "entered": <%- JSON.stringify(enteredGameTimes) %>,
+        "other": [],
+        "endOfCon": <%- END_OF_CON.valueOf() %>,
+        "startOfCon": <%- START_OF_CON.valueOf() %>,
+        "minPlayers": <%- game.min_players %>,
+        "maxPlayers": <%- game.max_players %>
+    }
+</script>
+<style>
+    tr {
+  transition: background-color 0.3s ease-in-out;
+}
+
+.focused {
+  background-color: var(--accent-yellow-tint);
+  animation: time-focus 1s 1;
+}
+
+@keyframes time-focus {
+  25%, 75% {
+    background-color: var(--accent-yellow-tint-high);
+  }
+  0%, 50%, 100% {
+    background-color: var(--accent-yellow-tint);
+  }
+}
+    </style>
+<main class="prose">
     <h1><%= game.name %></h1>
-    <div>Run by <%- include("inline-user", organizer) %></div>
+    <% if(user && (user.discord_id === organizer.discord_id)) { %>
+        <p>You are running this game.</p>
+        <a class="button" href="/games/<%= game.slug %>/edit">Edit</a>
+        <a class="button" href="/games/<%= game.slug %>/times">Add times</a>
+    <% } else { %>
+        <div class="not-prose">Run by <%- include("inline-user", organizer) %></div>
+    <% } %>
     <h2>Content warnings</h2>
     <p>This game may include the following:</p>
     <ul>
-        <% if(game.content_warnings.includes("violence")) { %>
-            <li>Violence</li>
-        <% } %>
-        <% if(game.content_warnings.includes("sexual-content")) { %>
-            <li>Sexual content</li>
-        <% } %>
-        <% if(game.content_warnings.includes("body-horror")) { %>
-            <li>Body horror</li>
-        <% } %>
-        <% if(game.content_warnings.includes("existential-horror")) { %>
-            <li>Existential horror</li>
-        <% } %>
+        <% game.content_warnings.split(',').forEach(cw => { %>
+            <li><%= cw %></li>
+        <% }) %>
         <% if(game.custom_content_warnings) { %>
             <li><%= game.custom_content_warnings %></li>
         <% } %>
@@ -27,19 +58,20 @@
     <table>
         <thead>
             <tr>
-                <th>Start</th>
-                <th>End</th>
+                <th>Time</th>
                 <th>Players</th>
             </tr>
         </thead>
         <tbody>
-            <% gameTimes.forEach(gt => { %>
-                <tr class="<% if(gt.num_entries >= game.max_players) {%>full<% } %>">
-                    <td><time><%= gt.start.toUTCString() %></time></td>
-                    <td><time><%= gt.end.toUTCString() %></time></td>
-                    <td><%= gt.num_entries %>/<%= game.max_players %></td>
+            <% currentGameTimes.forEach(gt => { %>
+                <tr class="<% if(gt.entries_count >= game.max_players) {%>full<% } %>" id="game-time-<%= gt.id %>">
+                    <td><display-time start="<%= gt.start %>" end="<%= gt.end %>">
+                        <%= new Date(gt.start) %> - <%= new Date(gt.end) %>
+                    </display-time></td>
+                    <td><%= gt.entries_count %>/<%= game.max_players %></td>
                 </tr>
             <% }) %>
         </tbody>
     </table>
+    <div class="not-prose" id="app"></div>
 </main>

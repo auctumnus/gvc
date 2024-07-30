@@ -12,4 +12,6 @@ tabletop roleplaying games.
 
 ## Running
 
-Ensure you're in the nix shell, then `bun install` and `bun start`.
+Build the Vue application with `npm run build`.
+
+Ensure you're in the nix shell, then `npm install` and `npm run start`.

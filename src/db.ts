@@ -1,4 +1,4 @@
-import Database from "better-sqlite3"
+import Database from "better-sqlite3";
 import { DB_FILE } from "./constants";
 
 export const db = new Database(DB_FILE);

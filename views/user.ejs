@@ -1,0 +1,10 @@
+<main>
+    <div><img src="<%= user.avatar %>" aria-hidden /> <span><%= user.username || user.display_name %></span></div>
+    <p>Joined at <time datetime="<%= new Date(user.created_at * 1000).toISOString() %>"><%= new Date(user.created_at * 1000).toISOString() %></time></p>
+    <p><a href="https://discord.com/users/<%= user.discord_id %>">Open profile on Discord</a></p>
+</main>
+<script defer>
+    document.querySelectorAll('time').forEach(time => {
+        time.textContent = new Date(time.getAttribute('datetime')).toLocaleString();
+    });
+</script>

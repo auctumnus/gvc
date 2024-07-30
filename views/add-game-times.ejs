@@ -1,0 +1,26 @@
+<script id="game-times-data" type="application/json">
+    {
+        "current": <%- JSON.stringify(thisGameTimes) %>,
+        "running": <%- JSON.stringify(otherRanGameTimes) %>,
+        "other": [],
+        "entered": <%- JSON.stringify(enteredGameTimes) %>,
+        "endOfCon": <%- END_OF_CON.valueOf() %>,
+        "startOfCon": <%- START_OF_CON.valueOf() %>,
+        "minPlayers": <%- game.min_players %>,
+        "maxPlayers": <%- game.max_players %>
+    }
+</script>
+<script src="/js/add-game-times.js" type="module"></script>
+<link rel="stylesheet" href="/css/add-game-times.css" />
+<link rel="stylesheet" href="/css/calendar.css" />
+<main>
+    <h1>Add times to <%= game.name %></h1>
+    <a href="/games/<%= game.slug %>">Back to game page</a>
+    <noscript>
+        Sorry, but this requires Javascript to function.
+        <style>#app { display: none; }</style>
+    </noscript>
+    <div id="app">
+    </div>
+</main>
+<dialog id="add-time-dialog"></dialog>

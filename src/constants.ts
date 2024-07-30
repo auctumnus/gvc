@@ -25,3 +25,18 @@ if (!DISCORD_OAUTH_URL || !DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 if (!COOKIE_SECRET) {
   throw new Error("Cookie secret is required.");
 }
+
+if (!process.env.START_OF_CON) {
+  console.error('no start time set, assuming "2024-08-09T00:00:00Z"');
+}
+
+if (!process.env.END_OF_CON) {
+  console.error('no end time set, assuming "2024-08-18T23:59:59Z"');
+}
+
+export const START_OF_CON = new Date(
+  process.env.START_OF_CON || "2024-08-09T00:00:00Z",
+);
+export const END_OF_CON = new Date(
+  process.env.END_OF_CON || "2024-08-18T23:59:59Z",
+);

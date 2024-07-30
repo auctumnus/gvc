@@ -7,6 +7,7 @@ const openModal = (el) => {
     el.classList.add("open");
     backdrop.classList.add("open");
   });
+  document.documentElement.style.overflow = 'hidden'
   if (!el.dataset.managed) {
     el.dataset.managed = true;
     el.addEventListener("keydown", (e) => {
@@ -22,11 +23,12 @@ const closeModal = (el) => {
   const backdrop = document.getElementById("modal-backdrop");
   el.classList.remove("open");
   backdrop.classList.remove("open");
+  document.documentElement.style.overflow = 'auto'
   el.addEventListener(
     "transitionend",
-    (e) => {
+    (_) => {
       el.close();
-      document.getElementById("modal-backdrop").remove();
+      document.getElementById("modal-backdrop")?.remove();
     },
     { once: true },
   );
