@@ -41,20 +41,25 @@
     <% } else { %>
         <div class="not-prose">Run by <%- include("inline-user", organizer) %></div>
     <% } %>
-    <h2>Content warnings</h2>
-    <p>This game may include the following:</p>
-    <ul>
-        <% game.content_warnings.split(',').forEach(cw => { %>
-            <li><%= cw %></li>
-        <% }) %>
-        <% if(game.custom_content_warnings) { %>
-            <li><%= game.custom_content_warnings %></li>
-        <% } %>
-    </ul>
+    <% if (game.content_warnings.length || game.custom_content_warnings) { %>
+        <h2>Content warnings</h2>
+        <p>This game may include the following:</p>
+        <ul>
+            <% game.content_warnings.split(',').forEach(cw => { %>
+                <li><%= cw %></li>
+            <% }) %>
+            <% if(game.custom_content_warnings) { %>
+                <li><%= game.custom_content_warnings %></li>
+            <% } %>
+        </ul>
+    <% } %>
     <h2>About this game</h2>
-    <p><%- game.description %></p>
+    <p><%- game.description || '<i>No description yet...</i>' %></p>
     <h2>Game times</h2>
     <noscript>Times in UTC.</noscript>
+    <% if (currentGameTimes.length === 0) { %>
+        <p>No times have been added for this game yet.</p>
+    <% } else {%>
     <table>
         <thead>
             <tr>
@@ -74,4 +79,5 @@
         </tbody>
     </table>
     <div class="not-prose" id="app"></div>
+    <% } %>
 </main>

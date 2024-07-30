@@ -1,6 +1,6 @@
 <script src="/js/display-time.js" type="module"></script>
 <main>
-    <h1>Add entry to <%= game.name %> (<display-time start="<%= gt.start %>" end="<%= gt.end %>">
+    <h1>Editing entry to <%= game.name %> (<display-time start="<%= gt.start %>" end="<%= gt.end %>">
 <%= new Date(gt.start) %> - <%= new Date(gt.end) %>
     </display-time>)</h1>
 
@@ -10,12 +10,12 @@
         </div>
     <% } %>
 
-    <form method="post" action="/games/<%= game.slug %>/time/<%= gt.id %>/entries">
+    <form method="post" action="/games/<%= game.slug %>/time/<%= gt.id %>/entries/<%= entry.id %>/edit">
         <label for="priority">Priority</label>
         <select name="priority" id="priority">
-            <option value="1">1</option>
+            <option value="1" >1</option>
             <option value="2">2</option>
-            <option value="3" selected>3</option>
+            <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
         </select>

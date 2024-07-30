@@ -290,7 +290,8 @@ router.get("/games", (req, res) => {
 
             users.discord_id as users_id,
             users.display_name as users_display_name,
-            users.avatar as users_avatar
+            users.avatar as users_avatar,
+            users.username as users_username
         from games
         
         inner join users on games.organizer = users.id
@@ -325,6 +326,8 @@ router.get("/games", (req, res) => {
           display_name: row.users_display_name,
           // @ts-ignore
           avatar: row.users_avatar,
+          // @ts-ignore
+          username: row.users_username
         },
       },
     }));
@@ -350,7 +353,7 @@ router.get("/games", (req, res) => {
 });
 
 router.get("/games/new", organizerOnly, (_, res) => {
-  res.view("new-game", { title: "New game" });
+  res.view("new-game", { title: "New game", error: false });
 });
 
 const createGameSchema = z.object({
@@ -364,7 +367,7 @@ router.post("/games", organizerOnly, (req, res) => {
     return;
   }
   const { name } = result.data;
-  const slug = slugify(name);
+  const slug = slugify(name).toLowerCase();
   if (slug === "new" || slug === "") {
     res.status(400).view("error", {
       error: { message: "Invalid game name", status: "Invalid request" },
@@ -515,7 +518,8 @@ const contentWarningSchema = z
   .max(1000)
   .transform((s) => s.split(","))
   .or(z.array(z.string()).max(allowedContentWarnings.length))
-  .transform(filterTo(allowedContentWarnings));
+  .transform(filterTo(allowedContentWarnings))
+  .transform((a) => a.join(","));
 
 const editGameSchema = z
   .object({
@@ -562,7 +566,7 @@ router.post("/games/:slug/edit", organizerOnly, (req, res) => {
   let slug = game.slug;
 
   if (result.data.name && result.data.name !== game.name) {
-    slug = slugify(result.data.name);
+    slug = slugify(result.data.name).toLowerCase();
   }
 
   db.prepare(
@@ -576,9 +580,10 @@ router.post("/games/:slug/edit", organizerOnly, (req, res) => {
       custom_content_warnings = $custom_content_warnings,
       min_players = $min_players,
       max_players = $max_players
-    where slug = $slug
+    where id = $id
   `,
   ).run({
+    id: game.id,
     name: game.name,
     summary: game.summary,
     description: game.description,
@@ -904,3 +909,44 @@ router.get('/users/:id', (req, res) => {
 
   res.view('user', { user });
 })
+
+router.get('/games/:slug/entries', (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id
+
+  if(game.organizer !== userID) {
+    res.status(403).send("You are not the organizer of this game.");
+    return;
+  }
+
+  const gameID = game.id
+
+  const entries = db
+    .prepare(
+      `
+      select
+        entries.*,
+        users.discord_id as users_id,
+        users.display_name as users_display_name,
+        users.avatar as users_avatar
+      from entries
+      inner join users on entries.user = users.id
+      where entries.game_time in (
+        select id from game_times where game = $gameID
+      )
+      order by entries.priority desc
+    `,
+    )
+    .all({ gameID }) as (DatabaseGameTime & { users_id: string, users_display_name: string, users_avatar: string })[]
+
+  res.view('entries', { entries, game });
+})
+

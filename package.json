@@ -8,7 +8,7 @@
     "lint": "prettier --write .",
     "dev": "tsx src/server.ts | pino-pretty -H",
     "start": "tsx src/server.ts",
-    "init-db": "rm ./gvc.db && sqlite3 ./gvc.db < ./schema.sql",
+    "init-db": "rm ./gvc.db; sqlite3 ./gvc.db < ./schema.sql",
     "watch": "vite build --watch --config vite.config.ts --mode development",
     "build": "vite build --config vite.config.ts"
   },

@@ -11,8 +11,10 @@
             <%= error %>
         </div>
     <% } %>
-    <a href="/games/<%= game.slug %>">Back to game page</a>
-    <a href="/games/<%= game.slug %>/times">Add times for this game</a>
+    <div style="margin-bottom: 1rem">
+        <a class="button" href="/games/<%= game.slug %>">Back</a>
+        <a class="button" href="/games/<%= game.slug %>/times">Add times</a>
+    </div>
     <form action="/games/<%= game.slug %>/edit" method="post">
         <div>
             <label for="name">Name</label>
@@ -26,7 +28,7 @@
         <div>
             <label for="description">Description</label>
             <p>This appears as a longer description of the game. Markdown is allowed.</p>
-            <textarea class="mde" id="description" name="description" value="<%= game.description %>"></textarea>
+            <textarea class="mde" id="description" name="description"><%= game.description %></textarea>
         </div>
         <div>
             <label for="content_warnings">Content warnings</label>
@@ -46,7 +48,7 @@
             </noscript>
             <select class="multiselect" name="content_warnings[]" multiple>
                 <% allowedContentWarnings.forEach(cw => {%>
-                    <option value="<%= cw %>"><%= cw %></option>
+                    <option value="<%= cw %>" <%= game.content_warnings.split(',').includes(cw) ? 'selected' : '' %>><%= cw %></option>
                 <% }) %>
             </select>
         </div>
@@ -79,6 +81,15 @@
                 'preview', 'side-by-side', 'fullscreen'
             ]
         });
+
         $('.multiselect').select2()
+
+        // hack to get the selected values to work I LOVE JAVASCRIPT
+
+        const contentWarnings = <%- JSON.stringify(game.content_warnings.split(',')) %>
+
+        contentWarnings.forEach(cw => {
+            $('.multiselect').val(cw).trigger('change')
+        })
     });
 </script>
