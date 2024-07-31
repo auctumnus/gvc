@@ -13,7 +13,7 @@ const getOauthData = (code: string) =>
       client_secret: DISCORD_CLIENT_SECRET!,
       code,
       grant_type: "authorization_code",
-      redirect_uri: `http://${HOST}${PORT ? `:${PORT}` : ''}/auth`,
+      redirect_uri: `http://${HOST}/auth`,
     }).toString(),
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

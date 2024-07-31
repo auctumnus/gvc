@@ -6,8 +6,8 @@ export const VIEWS_DIR = fromDir("../views");
 export const STATIC_DIR = fromDir("../static");
 export const DB_FILE = fromDir("../gvc.db");
 
-export const HOST = process.env.HOST || "localhost";
-export const PORT = process.env.PORT || (HOST === 'localhost' ? 9001 : 0);
+export const HOST = process.env.HOST || "localhost:9001";
+export const PORT = process.env.PORT || 9001;
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
 export const IS_PROD = NODE_ENV === "production";
