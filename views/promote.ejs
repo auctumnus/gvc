@@ -1,0 +1,10 @@
+<main>
+    <h1>Promote <%= viewUser.display_name || viewUser.username %></h1>
+    <form method="post" action="/users/<%= viewUser.discord_id %>/promote">
+        <label for="organizer">Organizer</label>
+        <input type="checkbox" name="organizer" id="organizer" <%= viewUser.organizer ? 'checked' : '' %> />
+        <label for="admin">Admin</label>
+        <input type="checkbox" name="admin" id="admin" <%= viewUser.admin ? 'checked' : '' %> />
+        <input type="submit" value="Promote" />
+    </form>
+</main>

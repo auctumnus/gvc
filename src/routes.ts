@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticated, getUser, organizerOnly } from "./auth";
+import { adminOnly, authenticated, getUser, organizerOnly } from "./auth";
 import {
   DISCORD_OAUTH_URL,
   END_OF_CON,
@@ -907,7 +907,7 @@ router.get('/users/:id', (req, res) => {
     return;
   }
 
-  res.view('user', { user });
+  res.view('user', { viewUser: user });
 })
 
 router.get('/games/:slug/entries', (req, res) => {
@@ -950,3 +950,46 @@ router.get('/games/:slug/entries', (req, res) => {
   res.view('entries', { entries, game });
 })
 
+router.get('/users/:id/promote', adminOnly, (req, res) => {
+  const user = db
+    .prepare("select * from users where discord_id = $id")
+    .get({ id: req.params.id }) as DatabaseUser | undefined;
+
+  if (!user) {
+    res.status(404).send("User not found");
+    return;
+  }
+
+  res.view('promote', { viewUser: user })
+})
+
+const PromoteSchema = z.object({
+  admin: z.coerce.boolean(),
+  organizer: z.coerce.boolean()
+}).partial()
+
+router.post('/users/:id/promote', adminOnly, (req, res) => {
+  const user = db
+    .prepare("select * from users where discord_id = $id")
+    .get({ id: req.params.id }) as DatabaseUser | undefined;
+
+  if (!user) {
+    res.status(404).send("User not found");
+    return;
+  }
+
+  const result = PromoteSchema.safeParse(req.body)
+
+  if(!result.success) {
+    res.status(400).send(toErrorMessage(result.error))
+    return
+  }
+
+  console.log(result.data)
+
+  db.prepare("update users set admin = $admin, organizer = $organizer where discord_id = $id").run({
+    id: req.params.id, admin: result.data.admin ? 1 : 0, organizer: result.data.organizer ? 1 : 0
+  })
+
+  res.redirect(`/users/${req.params.id}`)
+})
