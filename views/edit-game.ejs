@@ -1,8 +1,62 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="https://cdn.rawgit.com/xcatliu/simplemde-theme-dark/master/dist/simplemde-theme-dark.min.css" media="(prefers-color-scheme: dark)">
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+        .select2-search textarea, .select2-search input, .select2-selection--multiple {
+            color: var(--foreground);
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.375rem;
+            margin: 0.25rem 0;
+        }
+        .select2-results { background-color: var(--background-2); }
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid var(--border);
+            color: var(--foreground);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            border-color: var(--border);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                background-color: var(--background-1);
+            }
+
+        @media (prefers-color-scheme: dark) {
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                background-color: var(--background-2);
+            }
+            .select2-search { background-color: var(--background-1); }
+            .select2-search textarea, .select2-search input, .select2-container--default .select2-selection--multiple {
+                background-color: var(--background-1);
+            }
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--border);
+        }
+
+        input[type=number] {
+            appearance: none;
+        }
+
+        form > div {
+            margin-top: 2.5rem;
+        }
+
+        form > div > p {
+            margin: 0.5rem 0;
+            color: var(--foreground-1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+</style>
 
 <main>
     <h1>Editing <%= game.name %></h1>
@@ -12,12 +66,13 @@
         </div>
     <% } %>
     <div style="margin-bottom: 1rem">
-        <a class="button" href="/games/<%= game.slug %>">Back</a>
+        <a class="button secondary" href="/games/<%= game.slug %>">Back</a>
         <a class="button" href="/games/<%= game.slug %>/times">Add times</a>
     </div>
     <form action="/games/<%= game.slug %>/edit" method="post">
         <div>
             <label for="name">Name</label>
+            <p></p>
             <input type="text" id="name" name="name" required value="<%= game.name %>" />
         </div>
         <div>
@@ -59,11 +114,13 @@
         </div>
         <div>
             <label for="min_players">Minimum players</label>
-            <input type="number" id="min_players" name="min_players" value="<%= game.min_players %>" />
+            <p></p>
+            <input type="number" id="min_players" name="min_players" value="<%= game.min_players %>" min="0" />
         </div>
         <div>
             <label for="max_players">Maximum players</label>
-            <input type="number" id="max_players" name="max_players" value="<%= game.max_players %>" />
+            <p></p>
+            <input type="number" id="max_players" name="max_players" value="<%= game.max_players %>" min="0" />
         </div>
         <input type="submit" value="Save changes" />
     </form>

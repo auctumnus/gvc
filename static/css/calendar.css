@@ -124,11 +124,11 @@
 }
 
 .calendar-day-divider.outside-con {
-    background: var(--background-2);
+    background: var(--background-1);
 }
 
 .calendar-day-divider.past {
-    background: var(--background-1);
+    background: var(--background-2);
 }
 
 .event {

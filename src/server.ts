@@ -28,7 +28,6 @@ app.use(
       secure: IS_PROD,
     },
     store: new SessionStore(),
-    saveUninitialized: false,
   }),
 );
 app.use(renderer);
