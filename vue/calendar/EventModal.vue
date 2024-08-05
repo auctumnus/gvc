@@ -16,7 +16,7 @@ const emit = defineEmits<{ (e: 'close'): void }>()
         <h2>{{ event.game_name }} ({{ ts(event.start)  }} - {{ ts(event.end) }})</h2>
         
         <p>
-            <a href="/games/{{ event.game_slug }}">View game</a>
+            <a :href="`/games/${event.game_slug}`">View game</a>
         </p>
 
         <div class="buttons">
