@@ -357,7 +357,7 @@ router.get("/games/new", organizerOnly, (_, res) => {
 });
 
 const createGameSchema = z.object({
-  name: z.string().max(50),
+  name: z.string().max(200),
 });
 
 router.post("/games", organizerOnly, (req, res) => {
