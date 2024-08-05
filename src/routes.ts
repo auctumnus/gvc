@@ -523,8 +523,8 @@ const contentWarningSchema = z
 
 const editGameSchema = z
   .object({
-    name: z.string().max(50),
-    summary: z.string().max(100),
+    name: z.string().max(200),
+    summary: z.string().max(1_000),
     description: z.string().max(10_000),
     content_warnings: contentWarningSchema,
     custom_content_warnings: z.string().max(1000),
