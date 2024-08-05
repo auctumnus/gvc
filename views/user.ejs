@@ -2,7 +2,7 @@
     <div><img src="<%= viewUser.avatar %>" aria-hidden /> <span><%= viewUser.display_name || viewUser.username %></span></div>
     <p>Joined at <time datetime="<%= new Date(viewUser.created_at * 1000).toISOString() %>"><%= new Date(viewUser.created_at * 1000).toISOString() %></time></p>
     <p><a href="https://discord.com/users/<%= viewUser.discord_id %>">Open profile on Discord</a></p>
-    <% if (user.admin) { %>
+    <% if (user?.admin) { %>
     <a class="button" href="/users/<%= viewUser.discord_id %>/promote">Promote</a>
     <ul style="margin-top: 1rem">
         <li>Organizer: <%= viewUser.organizer ? 'yes' : 'no' %></li>
