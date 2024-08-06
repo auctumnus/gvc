@@ -1,0 +1,17 @@
+<script src="/js/display-time.js" type="module"></script>
+<main>
+    <h1>Remove entry to <%= game.name %> (<display-time start="<%= gt.start %>" end="<%= gt.end %>">
+<%= new Date(gt.start) %> - <%= new Date(gt.end) %>
+    </display-time>)?</h1>
+
+    <% if(error) { %>
+        <div class="form-error">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form method="post" action="/games/<%= game.slug %>/times/<%= gt.id %>/remove-entry">
+        
+        <input type="submit" value="Confirm" />
+    </form>
+</main>

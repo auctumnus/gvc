@@ -34,7 +34,10 @@ export class SessionStore extends Store {
   }
 
   set(sid: string, session: SessionData, callback: (e: Error | null) => void) {
-    if(!session.user) { callback(null); return; }
+    if (!session.user) {
+      callback(null);
+      return;
+    }
     try {
       const user_id = session.user?.id;
       // @ts-ignore

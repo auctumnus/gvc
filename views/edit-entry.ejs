@@ -10,16 +10,24 @@
         </div>
     <% } %>
 
-    <form method="post" action="/games/<%= game.slug %>/time/<%= gt.id %>/entries/<%= entry.id %>/edit">
+    <form method="post" action="/games/<%= game.slug %>/times/<%= gt.id %>/edit-entry">
         <label for="priority">Priority</label>
         <select name="priority" id="priority">
-            <option value="1" >1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
+            <option value="1" <% if(entry.priority === 1) {%>selected id="selected-option"<% } %>>1</option>
+            <option value="2" <% if(entry.priority === 2) {%>selected id="selected-option"<% } %>>2</option>
+            <option value="3" <% if(entry.priority === 3) {%>selected id="selected-option"<% } %>>3</option>
+            <option value="4" <% if(entry.priority === 4) {%>selected id="selected-option"<% } %>>4</option>
+            <option value="5" <% if(entry.priority === 5) {%>selected id="selected-option"<% } %>>5</option>
         </select>
         <p>1 is the lowest priority, 5 is the highest priority.</p>
         <input type="submit" value="Add entry" />
     </form>
 </main>
+
+<script>
+    // oh my god i hate firefox
+    document.addEventListener('DOMContentLoaded', () => {
+        const priority = document.getElementById('priority');
+        priority.value = document.getElementById('selected-option').value;
+    })
+</script>

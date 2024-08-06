@@ -9,7 +9,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         "add-game-times": resolve(__dirname, "vue/add-game-times/main.ts"),
-        "calendar": resolve(__dirname, "vue/calendar/main.ts"),
+        calendar: resolve(__dirname, "vue/calendar/main.ts"),
       },
       output: {
         assetFileNames: "[name][extname]",

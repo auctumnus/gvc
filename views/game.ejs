@@ -65,15 +65,21 @@
             <tr>
                 <th>Time</th>
                 <th>Players</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             <% currentGameTimes.forEach(gt => { %>
-                <tr class="<% if(gt.entries_count >= game.max_players) {%>full<% } %>" id="game-time-<%= gt.id %>">
+                <tr class="<% if(gt.entries_count >= game.max_players) {%>full<% } %> <% if(gt.entered) { %> entered <% } %>" id="game-time-<%= gt.id %>">
                     <td><display-time start="<%= gt.start %>" end="<%= gt.end %>">
                         <%= new Date(gt.start) %> - <%= new Date(gt.end) %>
                     </display-time></td>
                     <td><%= gt.entries_count %>/<%= game.max_players %></td>
+                    <% if(gt.entered) { %>
+                        <td><a href="/games/<%= game.slug %>/times/<%= gt.id %>/edit-entry">Edit</a> or <a href="/games/<%= game.slug %>/times/<%= gt.id %>/remove-entry">remove</a></td>
+                    <% } else { %>
+                        <td><a href="/games/<%= game.slug %>/times/<%= gt.id %>/add-entry">Enter</a></td>
+                    <% } %>
                 </tr>
             <% }) %>
         </tbody>

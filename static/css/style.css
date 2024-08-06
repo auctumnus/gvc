@@ -55,7 +55,8 @@ body {
   flex-direction: column;
 }
 
-dialog, select {
+dialog,
+select {
   color: inherit;
 }
 
@@ -100,18 +101,26 @@ header > h1 {
   -webkit-text-fill-color: transparent;
 }
 
-button, input[type="submit"], a.button {
+button,
+input[type="submit"],
+a.button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  box-shadow: 0 1px 3px 0 rgb(208 83 83 / 0.1), 0 1px 2px -1px rgb(208 83 83 / 0.1);
-  transition: box-shadow .66s var(--modal-transition-timing);
+  box-shadow:
+    0 1px 3px 0 rgb(208 83 83 / 0.1),
+    0 1px 2px -1px rgb(208 83 83 / 0.1);
+  transition: box-shadow 0.66s var(--modal-transition-timing);
   font-weight: 500;
 }
 
-button:hover:not(:disabled), input[type="submit"]:hover:not(:disabled), a.button:hover:not(:disabled) {
-  box-shadow: 0 20px 25px -5px rgb(208 83 83 / 0.1), 0 8px 10px -6px rgb(208 83 83 / 0.1);
+button:hover:not(:disabled),
+input[type="submit"]:hover:not(:disabled),
+a.button:hover:not(:disabled) {
+  box-shadow:
+    0 20px 25px -5px rgb(208 83 83 / 0.1),
+    0 8px 10px -6px rgb(208 83 83 / 0.1);
 }
 
 .links a:not(:last-child) {
@@ -246,7 +255,9 @@ a:hover:not(.button) {
 
 dialog {
   background-color: var(--background);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
   opacity: 0;
   transition: opacity 0.3s var(--modal-transition-timing);
 
@@ -315,30 +326,37 @@ input[type="submit"]:disabled {
 button.secondary,
 a.button.secondary,
 input[type="reset"] {
-  box-shadow: inset 2px 2px 0px 0px var(--border),
-              inset -2px -2px 0px 0px var(--border),
-              0 1px 2px 0 rgb(0 0 0 / 0.05);
+  box-shadow:
+    inset 2px 2px 0px 0px var(--border),
+    inset -2px -2px 0px 0px var(--border),
+    0 1px 2px 0 rgb(0 0 0 / 0.05);
   background: none;
   font-weight: 500;
   color: var(--foreground-1);
-  transition: background 0.2s var(--modal-transition-timing),
-              box-shadow 0.66s var(--modal-transition-timing);
+  transition:
+    background 0.2s var(--modal-transition-timing),
+    box-shadow 0.66s var(--modal-transition-timing);
 }
 
 button.secondary:not(:disabled):hover,
 a.button.secondary:not(:disabled):hover,
 input[type="reset"]:not(:disabled):hover {
-  box-shadow: inset 2px 2px 0px 0px var(--border),
-              inset -2px -2px 0px 0px var(--border),
-              0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  box-shadow:
+    inset 2px 2px 0px 0px var(--border),
+    inset -2px -2px 0px 0px var(--border),
+    0 1px 3px 0 rgb(0 0 0 / 0.1),
+    0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
-button.secondary:disabled, input[type="reset"]:disabled, a.button.secondary:disabled {
+button.secondary:disabled,
+input[type="reset"]:disabled,
+a.button.secondary:disabled {
   opacity: 0.7;
   color: var(--border);
   cursor: not-allowed;
-  box-shadow: inset 2px 2px 0px 0px var(--border),
-              inset -2px -2px 0px 0px var(--border);
+  box-shadow:
+    inset 2px 2px 0px 0px var(--border),
+    inset -2px -2px 0px 0px var(--border);
 }
 
 button.icon {

@@ -6,7 +6,13 @@ import {
   IS_PROD,
   START_OF_CON,
 } from "./constants";
-import { DatabaseGame, DatabaseGameTime, DatabaseUser, db } from "./db";
+import {
+  DatabaseEntry,
+  DatabaseGame,
+  DatabaseGameTime,
+  DatabaseUser,
+  db,
+} from "./db";
 import { z, ZodError } from "zod";
 
 import slugify from "slugify";
@@ -175,101 +181,112 @@ const allowedContentWarnings = [
 ];
 
 const parseStringBool = (s: string) => {
-  if(s === 'true') {
-    return true
-  } else if(s === 'false') {
-    return false
+  if (s === "true") {
+    return true;
+  } else if (s === "false") {
+    return false;
   } else {
-    return undefined
+    return undefined;
   }
-}
+};
 
-const filterSchema = z.object({
-  content_warnings: z.array(z.string()).max(allowedContentWarnings.length).refine(a => a.every(s => allowedContentWarnings.includes(s))),
-  entered: z.string().max(5).transform(parseStringBool),
-  running: z.string().max(5).transform(parseStringBool),
-  text: z.string().max(1000)
-}).partial();
+const filterSchema = z
+  .object({
+    content_warnings: z
+      .array(z.string())
+      .max(allowedContentWarnings.length)
+      .refine((a) => a.every((s) => allowedContentWarnings.includes(s))),
+    entered: z.string().max(5).transform(parseStringBool),
+    running: z.string().max(5).transform(parseStringBool),
+    text: z.string().max(1000),
+  })
+  .partial();
 
 // SAFETY: we know that each `cw` has to be part of `allowedContentWarnings`, unless zod breaks
 // if zod breaks we have worse to worry about
-const makeContentWarningFilter = (cws: string[]) => cws.map(cw => `games.content_warnings not like '%${cw}%'`).join(' and ')
+const makeContentWarningFilter = (cws: string[]) =>
+  cws.map((cw) => `games.content_warnings not like '%${cw}%'`).join(" and ");
 
-const makeStatusFilter = (entered: boolean | undefined, running: boolean | undefined) => {
-  const runningFilter = `games.organizer = $userID`
+const makeStatusFilter = (
+  entered: boolean | undefined,
+  running: boolean | undefined,
+) => {
+  const runningFilter = `games.organizer = $userID`;
   const enteredFilter = `exists (
         select 1
         from entries
         inner join game_times on entries.game_time = game_times.id
         where entries.user = $userID and game_times.game = games.id
-      )`
-  
-  let filter = ''
-  if(running === true) {
-    filter += runningFilter
-  } else if(running === false) {
-    filter += `not ${runningFilter}`
+      )`;
+
+  let filter = "";
+  if (running === true) {
+    filter += runningFilter;
+  } else if (running === false) {
+    filter += `not ${runningFilter}`;
   }
 
-  if(entered === true) {
-    if(filter !== '') {
-      filter += ' or '
+  if (entered === true) {
+    if (filter !== "") {
+      filter += " or ";
     }
-    filter += enteredFilter
-  } else if(entered === false) {
-    if(filter !== '') {
-      filter += ' or '
+    filter += enteredFilter;
+  } else if (entered === false) {
+    if (filter !== "") {
+      filter += " or ";
     }
-    filter += `not ${enteredFilter}`
+    filter += `not ${enteredFilter}`;
   }
 
-  return filter
-}
+  return filter;
+};
 
 const makeTextFilter = (text?: string) => {
-  if(text) {
-    return `games.name like '%$filterText%' or games.summary like '%$filterText%' or games.description like '%$filterText%'`
+  if (text) {
+    return `games.name like '%$filterText%' or games.summary like '%$filterText%' or games.description like '%$filterText%'`;
   } else {
-    return ''
+    return "";
   }
-}
-
+};
 
 const makeGamesFilter = (filter: z.infer<typeof filterSchema>) => {
-  const contentWarningFilter = makeContentWarningFilter(filter.content_warnings || [])
-  const statusFilter = makeStatusFilter(filter.entered, filter.running)
-  const textFilter = makeTextFilter(filter.text)
-  const overall = [contentWarningFilter, statusFilter, textFilter].filter(f => f !== '').join(' and ')
-  if(overall === '') {
-    return ''
+  const contentWarningFilter = makeContentWarningFilter(
+    filter.content_warnings || [],
+  );
+  const statusFilter = makeStatusFilter(filter.entered, filter.running);
+  const textFilter = makeTextFilter(filter.text);
+  const overall = [contentWarningFilter, statusFilter, textFilter]
+    .filter((f) => f !== "")
+    .join(" and ");
+  if (overall === "") {
+    return "";
   } else {
-    return `where ${overall}`
+    return `where ${overall}`;
   }
-}
+};
 
 router.get("/games", (req, res) => {
   const page = parseInt(req.query.page as string, 10) || 1;
 
   let hasFilter = false;
 
-  
   const filterRes = filterSchema.safeParse(req.query);
   const filter = (() => {
-    if(filterRes.error) {
-      console.log(filterRes.error)
-      return {} as z.infer<typeof filterSchema>
+    if (filterRes.error) {
+      console.log(filterRes.error);
+      return {} as z.infer<typeof filterSchema>;
     } else {
-      hasFilter = true
-      return filterRes.data
+      hasFilter = true;
+      return filterRes.data;
     }
-  })()
+  })();
 
-  console.log('q', JSON.stringify(req.query))
-  console.log('f', JSON.stringify(filter))
+  console.log("q", JSON.stringify(req.query));
+  console.log("f", JSON.stringify(filter));
 
-  const userID = req.session.user?.id
+  const userID = req.session.user?.id;
 
-  if(!userID) {
+  if (!userID) {
     filter.entered = undefined;
     filter.running = undefined;
   }
@@ -306,7 +323,7 @@ router.get("/games", (req, res) => {
     .all({
       offset: (page - 1) * 10,
       userID,
-      filterText: filter.text
+      filterText: filter.text,
     })
     .map((row) => ({
       game: {
@@ -327,7 +344,7 @@ router.get("/games", (req, res) => {
           // @ts-ignore
           avatar: row.users_avatar,
           // @ts-ignore
-          username: row.users_username
+          username: row.users_username,
         },
       },
     }));
@@ -348,7 +365,7 @@ router.get("/games", (req, res) => {
     isFirstPage,
     isLastPage,
     filter,
-    hasFilter
+    hasFilter,
   });
 });
 
@@ -385,7 +402,6 @@ router.post("/games", organizerOnly, (req, res) => {
   res.redirect(`/games/${slug}`);
 });
 
-
 router.get("/games/:slug", (req, res) => {
   const game = db
     .prepare(
@@ -412,32 +428,33 @@ router.get("/games/:slug", (req, res) => {
   }
 
   const userID = req.session.user?.id;
-  const gameID = game.id
+  const gameID = game.id;
 
-  const currentGameTimes = (
-    db
-      .prepare(
-        `
+  const currentGameTimes = db
+    .prepare(
+      `
       select 
       *, 
       (
         select count(1) 
         from entries 
         where entries.game_time = game_times.id
-      ) as entries_count
+      ) as entries_count,
+      exists( select 1 from entries where entries.user = $userID and entries.game_time = game_times.id) as entered,
+      exists( select 1 from entries where entries.user = $userID and entries.game_time = game_times.id and entries.accepted = 1) as accepted
       from game_times
       where game = $gameID
       order by start asc
     `,
-      )
-      .all({ gameID: game.id }) as (DatabaseGameTime & {
-      entries_count: number;
-    })[]
-  );
+    )
+    .all({ gameID: game.id, userID: userID || null }) as (DatabaseGameTime & {
+    entries_count: number;
+  })[];
 
-  const otherRanGameTimes = userID ? db
-    .prepare(
-      `
+  const otherRanGameTimes = userID
+    ? (db
+        .prepare(
+          `
     select
       game_times.*,
       games.name as game_name,
@@ -447,24 +464,28 @@ router.get("/games/:slug", (req, res) => {
     where games.organizer = $userID and games.id != $gameID
     order by start asc
   `,
-    )
-    .all({ userID, gameID }) as DatabaseGameTime[] : [];
+        )
+        .all({ userID, gameID }) as DatabaseGameTime[])
+    : [];
 
-  const enteredGameTimes = userID ? db
-    .prepare(
-      `
+  const enteredGameTimes = userID
+    ? (db
+        .prepare(
+          `
     select
       game_times.*,
       games.name as game_name,
-      games.slug as game_slug
+      games.slug as game_slug,
+        entries.accepted as accepted
       from game_times
       inner join entries on game_times.id = entries.game_time
       inner join games on game_times.game = games.id
       where entries.user = $userID and games.id != $gameID
       order by start asc
     `,
-    )
-    .all({ userID, gameID }) as DatabaseGameTime[] : [];
+        )
+        .all({ userID, gameID }) as DatabaseGameTime[])
+    : [];
 
   const organizer = {
     discord_id: game.users_id,
@@ -482,7 +503,6 @@ router.get("/games/:slug", (req, res) => {
     organizer,
   });
 });
-
 
 const filterTo = (allowed: string[]) => (arr: string[]) =>
   arr.filter((x) => allowed.includes(x));
@@ -629,6 +649,7 @@ router.get("/games/:slug/times", organizerOnly, (req, res) => {
         from entries 
         where entries.game_time = game_times.id
       ) as entries_count
+
       from game_times
       where game = $gameID
       order by start asc
@@ -657,7 +678,8 @@ router.get("/games/:slug/times", organizerOnly, (req, res) => {
     select
       game_times.*,
       games.name as game_name,
-      games.slug as game_slug
+      games.slug as game_slug,
+        entries.accepted as accepted
       from game_times
       inner join entries on game_times.id = entries.game_time
       inner join games on game_times.game = games.id
@@ -709,8 +731,6 @@ router.post("/games/:slug/times", organizerOnly, (req, res) => {
     return;
   }
 
-  
-
   const result = createGameTimeSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -718,23 +738,25 @@ router.post("/games/:slug/times", organizerOnly, (req, res) => {
     return;
   }
 
-  const rowid = db.prepare(
-    `
+  const rowid = db
+    .prepare(
+      `
     insert into game_times (game, start, end)
     values ($gameID, $start, $end)
     returning *
   `,
-  ).run({
-    gameID: game.id,
-    start: result.data.start,
-    end: result.data.end,
-  });
+    )
+    .run({
+      gameID: game.id,
+      start: result.data.start,
+      end: result.data.end,
+    });
 
   const gameTime = db
     .prepare("select * from game_times where id = $id")
     .get({ id: rowid.lastInsertRowid }) as DatabaseGameTime;
 
-  res.status(201).send({ ...gameTime, entries_count: 0});
+  res.status(201).send({ ...gameTime, entries_count: 0 });
 });
 
 router.patch("/games/:slug/times/:id", organizerOnly, (req, res) => {
@@ -809,8 +831,8 @@ router.delete("/games/:slug/times/:id", organizerOnly, (req, res) => {
   res.sendStatus(204);
 });
 
-router.get('/schedule', (req, res) => {
-  if(!req.session.user) {
+router.get("/schedule", (req, res) => {
+  if (!req.session.user) {
     const otherGameTimes = db
       .prepare(
         `
@@ -825,7 +847,7 @@ router.get('/schedule', (req, res) => {
       )
       .all() as DatabaseGameTime[];
 
-    res.view('schedule', {
+    res.view("schedule", {
       otherGameTimes,
       START_OF_CON,
       END_OF_CON,
@@ -834,7 +856,7 @@ router.get('/schedule', (req, res) => {
       enteredGameTimes: [],
     });
   } else {
-    const userID = req.session.user.id
+    const userID = req.session.user.id;
     const otherRanGameTimes = db
       .prepare(
         `
@@ -856,7 +878,8 @@ router.get('/schedule', (req, res) => {
       select
         game_times.*,
         games.name as game_name,
-        games.slug as game_slug
+        games.slug as game_slug,
+        entries.accepted as accepted
       from game_times
       inner join entries on game_times.id = entries.game_time
       inner join games on game_times.game = games.id
@@ -885,7 +908,7 @@ router.get('/schedule', (req, res) => {
       )
       .all({ userID }) as DatabaseGameTime[];
 
-    res.view('schedule', {
+    res.view("schedule", {
       otherGameTimes,
       START_OF_CON,
       END_OF_CON,
@@ -894,10 +917,9 @@ router.get('/schedule', (req, res) => {
       enteredGameTimes,
     });
   }
-})
+});
 
-
-router.get('/users/:id', (req, res) => {
+router.get("/users/:id", (req, res) => {
   const user = db
     .prepare("select * from users where discord_id = $id")
     .get({ id: req.params.id }) as DatabaseUser | undefined;
@@ -907,10 +929,10 @@ router.get('/users/:id', (req, res) => {
     return;
   }
 
-  res.view('user', { viewUser: user });
-})
+  res.view("user", { viewUser: user });
+});
 
-router.get('/games/:slug/entries', (req, res) => {
+router.get("/games/:slug/times/:time/entries", organizerOnly, (req, res) => {
   const game = db
     .prepare("select * from games where slug = $slug")
     .get({ slug: req.params.slug }) as DatabaseGame | undefined;
@@ -920,76 +942,449 @@ router.get('/games/:slug/entries', (req, res) => {
     return;
   }
 
-  const userID = req.session.user?.id
+  const userID = req.session.user?.id;
 
-  if(game.organizer !== userID) {
-    res.status(403).send("You are not the organizer of this game.");
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
     return;
   }
 
-  const gameID = game.id
-
-  const entries = db
-    .prepare(
-      `
+  const entries = (
+    db
+      .prepare(
+        `
       select
         entries.*,
         users.discord_id as users_id,
+        users.username as users_username,
         users.display_name as users_display_name,
         users.avatar as users_avatar
       from entries
       inner join users on entries.user = users.id
-      where entries.game_time in (
-        select id from game_times where game = $gameID
-      )
-      order by entries.priority desc
+      where entries.game_time = $time
+      order by entries.accepted desc, entries.priority desc
     `,
+      )
+      .all({ time: req.params.time }) as (DatabaseEntry & {
+      users_id: string;
+      users_username: string;
+      users_display_name: string;
+      users_avatar: string;
+    })[]
+  ).map((e) => ({
+    ...e,
+    user: {
+      discord_id: e.users_id,
+      username: e.users_username,
+      display_name: e.users_display_name,
+      avatar: e.users_avatar,
+    },
+  }));
+
+  res.send(JSON.stringify(entries));
+});
+
+router.patch("/games/:slug/times/:time/entries/:entry", organizerOnly, (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const entry = db
+    .prepare(
+      `
+    select * from entries where id = $entry and game_time = $time
+  `,
     )
-    .all({ gameID }) as (DatabaseGameTime & { users_id: string, users_display_name: string, users_avatar: string })[]
+    .get({ entry: req.params.entry, time: req.params.time }) as DatabaseEntry | undefined;
 
-  res.view('entries', { entries, game });
-})
-
-router.get('/users/:id/promote', adminOnly, (req, res) => {
-  const user = db
-    .prepare("select * from users where discord_id = $id")
-    .get({ id: req.params.id }) as DatabaseUser | undefined;
-
-  if (!user) {
-    res.status(404).send("User not found");
+  if (!entry) {
+    res.status(404).send("Entry not found");
     return;
   }
 
-  res.view('promote', { viewUser: user })
-})
+  const result = z
+    .object({
+      accepted: z.boolean(),
+    })
+    .safeParse(req.body);
 
-const PromoteSchema = z.object({
-  admin: z.coerce.boolean(),
-  organizer: z.coerce.boolean()
-}).partial()
-
-router.post('/users/:id/promote', adminOnly, (req, res) => {
-  const user = db
-    .prepare("select * from users where discord_id = $id")
-    .get({ id: req.params.id }) as DatabaseUser | undefined;
-
-  if (!user) {
-    res.status(404).send("User not found");
+  if (!result.success) {
+    res.status(400).send(toErrorMessage(result.error));
     return;
   }
 
-  const result = PromoteSchema.safeParse(req.body)
+  db.prepare(
+    `
+    update entries set
+      accepted = $accepted
+    where id = $entry
+  `,
+  ).run({
+    entry: req.params.entry,
+    accepted: result.data.accepted ? 1 : 0,
+  });
 
-  if(!result.success) {
-    res.status(400).send(toErrorMessage(result.error))
+  res.sendStatus(200);
+})
+
+router.get("/games/:slug/times/:time/add-entry", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  res.view("add-entry", { game, gt: game_time, error: false });
+});
+
+router.post("/games/:slug/times/:time/entries", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const result = z
+    .object({
+      priority: z.coerce.number().min(1).max(5),
+    })
+    .safeParse(req.body);
+
+  if (!result.success) {
+    res.status(400).send(toErrorMessage(result.error));
+    return;
+  }
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  const existingEntry = db
+    .prepare(
+      `
+    select * from entries where user = $user and game_time = $game_time
+  `,
+    )
+    .get({ user: userID, game_time: req.params.time }) as DatabaseEntry | undefined;
+
+  if (existingEntry) {
+    res.status(400).send("You already have an entry for this game time.");
     return
   }
 
-  console.log(result.data)
+  db.prepare(
+    `
+    insert into entries (user, game_time, priority)
+    values ($user, $game_time, $priority)
+  `,
+  ).run({
+    user: userID,
+    game_time: req.params.time,
+    priority: result.data.priority,
+  });
 
-  db.prepare("update users set admin = $admin, organizer = $organizer where discord_id = $id").run({
-    id: req.params.id, admin: result.data.admin ? 1 : 0, organizer: result.data.organizer ? 1 : 0
-  })
+  res.redirect(`/games/${req.params.slug}`);
+});
 
-  res.redirect(`/users/${req.params.id}`)
+router.get("/games/:slug/times/:time/edit-entry", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  const entry = db
+    .prepare(
+      `
+    select * from entries where user = $userID and game_time = $time
+  `,
+    )
+    .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+
+  if (!entry) {
+    res.status(404).send("Entry not found");
+    return;
+  }
+
+  res.view("edit-entry", { game, gt: game_time, entry, error: false });
 })
+
+router.post("/games/:slug/times/:time/edit-entry", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  const entry = db
+    .prepare(
+      `
+    select * from entries where user = $userID and game_time = $time
+  `,
+    )
+    .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+
+  if (!entry) {
+    res.status(404).send("Entry not found");
+    return;
+  }
+
+  const result = z
+    .object({
+      priority: z.coerce.number().min(1).max(5),
+    })
+    .safeParse(req.body);
+
+  if (!result.success) {
+    res.status(400).send(toErrorMessage(result.error));
+    return;
+  }
+
+  db.prepare(
+    `
+    update entries set
+      priority = $priority
+    where user = $user and game_time = $game_time
+  `,
+  ).run({
+    user: userID,
+    game_time: req.params.time,
+    priority: result.data.priority,
+  });
+
+  res.redirect(`/games/${req.params.slug}`);
+})
+
+router.post("/games/:slug/times/:time/remove-entry", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  
+    if (!game) {
+      res.status(404).send("Game not found");
+      return;
+    }
+  
+    const userID = req.session.user?.id;
+  
+    if (!userID) {
+      res.status(403).send("You are not logged in.");
+      return;
+    }
+  
+    const gameID = game.id;
+  
+    const game_time = db
+      .prepare("select * from game_times where id = $id and game = $gameID")
+      .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+  
+    if (!game_time) {
+      res.status(404).send("Game time not found");
+      return;
+    }
+  
+    const entry = db
+      .prepare(
+        `
+      select * from entries where user = $userID and game_time = $time
+    `,
+      )
+      .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+  
+    if (!entry) {
+      res.status(404).send("Entry not found");
+      return;
+    }
+  
+    db.prepare("delete from entries where user = $userID and game_time = $time").run({ userID, time: req.params.time });
+  
+    res.redirect(`/games/${req.params.slug}`);
+})
+
+router.get("/games/:slug/times/:time/remove-entry", (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  
+    if (!game) {
+      res.status(404).send("Game not found");
+      return;
+    }
+  
+    const userID = req.session.user?.id;
+  
+    if (!userID) {
+      res.status(403).send("You are not logged in.");
+      return;
+    }
+  
+    const gameID = game.id;
+  
+    const game_time = db
+      .prepare("select * from game_times where id = $id and game = $gameID")
+      .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+  
+    if (!game_time) {
+      res.status(404).send("Game time not found");
+      return;
+    }
+  
+    const entry = db
+      .prepare(
+        `
+      select * from entries where user = $userID and game_time = $time
+    `,
+      )
+      .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+  
+    if (!entry) {
+      res.status(404).send("Entry not found");
+      return;
+    }
+  
+    res.view("remove-entry", { game, gt: game_time, entry, error: false });
+})
+
+router.get("/users/:id/promote", adminOnly, (req, res) => {
+  const user = db
+    .prepare("select * from users where discord_id = $id")
+    .get({ id: req.params.id }) as DatabaseUser | undefined;
+
+  if (!user) {
+    res.status(404).send("User not found");
+    return;
+  }
+
+  res.view("promote", { viewUser: user });
+});
+
+const PromoteSchema = z
+  .object({
+    admin: z.coerce.boolean(),
+    organizer: z.coerce.boolean(),
+  })
+  .partial();
+
+router.post("/users/:id/promote", adminOnly, (req, res) => {
+  const user = db
+    .prepare("select * from users where discord_id = $id")
+    .get({ id: req.params.id }) as DatabaseUser | undefined;
+
+  if (!user) {
+    res.status(404).send("User not found");
+    return;
+  }
+
+  const result = PromoteSchema.safeParse(req.body);
+
+  if (!result.success) {
+    res.status(400).send(toErrorMessage(result.error));
+    return;
+  }
+
+  console.log(result.data);
+
+  db.prepare(
+    "update users set admin = $admin, organizer = $organizer where discord_id = $id",
+  ).run({
+    id: req.params.id,
+    admin: result.data.admin ? 1 : 0,
+    organizer: result.data.organizer ? 1 : 0,
+  });
+
+  res.redirect(`/users/${req.params.id}`);
+});

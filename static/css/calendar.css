@@ -1,226 +1,251 @@
 :root {
-    --current: rgb(0, 218, 122);
-    --running: rgb(135, 198, 212);
-    --entered: rgb(217, 184, 125);
-    --other: rgb(190, 190, 190);
+  --current: rgb(0, 218, 122);
+  --running: rgb(135, 198, 212);
+  --entered: rgb(217, 184, 125);
+  --accepted: #0089ff;
+  --other: rgb(190, 190, 190);
 
-    --current-shadow: rgb(0 218 122 / 0.1);
-    --running-shadow: rgb(135 198 212 / 0.1);
-    --entered-shadow: rgb(217 184 125 / 0.1);
-    --other-shadow: rgb(190 190 190 / 0.1);
+  --current-shadow: rgb(0 218 122 / 0.1);
+  --running-shadow: rgb(135 198 212 / 0.1);
+  --entered-shadow: rgb(217 184 125 / 0.1);
+  --accepted-shadow: rgb(0 137 255 / 0.1);
+  --other-shadow: rgb(190 190 190 / 0.1);
 }
 
 .calendar {
-    --day-padding: 0.1rem;
-    --week-header-width: 4rem;
-    --margin-around-main: 48px;
-    --day-container-width: calc((100vw - var(--week-header-width) - var(--margin-around-main)) / 7);
-    --day-width: calc(var(--day-container-width) - (2 * var(--day-padding)));
-    --hour-height: 3rem;
+  --day-padding: 0.1rem;
+  --week-header-width: 4rem;
+  --margin-around-main: 48px;
+  --day-container-width: calc(
+    (100vw - var(--week-header-width) - var(--margin-around-main)) / 7
+  );
+  --day-width: calc(var(--day-container-width) - (2 * var(--day-padding)));
+  --hour-height: 3rem;
 
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
 }
 
 .calendar-help-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 0 0.375rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0 0.375rem;
 }
 
 @media (max-width: 768px) {
-    .calendar {
-        position: relative;
-        width: 100vw;
-        left: -24px;
+  .calendar {
+    position: relative;
+    width: 100vw;
+    left: -24px;
 
-        --margin-around-main: 0;
-        --day-container-width: calc(((100vw - var(--week-header-width)) / 7));
-    }
+    --margin-around-main: 0;
+    --day-container-width: calc(((100vw - var(--week-header-width)) / 7));
+  }
 
-    .event {
-        font-size: 0.7rem;
-    }
+  .event {
+    font-size: 0.7rem;
+  }
 }
 
 .calendar-controls {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: calc(100vw - 1rem - var(--margin-around-main));
-    font-size: 0.8rem;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    padding: 0 0.375rem;
-    margin-bottom: 0.875rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(100vw - 1rem - var(--margin-around-main));
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.375rem;
+  margin-bottom: 0.875rem;
 }
 
 .calendar-controls h2 {
-    text-align: center;
+  text-align: center;
 }
 
 .calendar-week {
-    display: grid;
-    grid-template-columns: var(--week-header-width) repeat(7, var(--day-container-width));
-    grid-template-rows: auto auto;
+  display: grid;
+  grid-template-columns: var(--week-header-width) repeat(
+      7,
+      var(--day-container-width)
+    );
+  grid-template-rows: auto auto;
 }
 
-.calendar-week-header, .calendar-header-spacer {
-    width: var(--week-header-width);
+.calendar-week-header,
+.calendar-header-spacer {
+  width: var(--week-header-width);
 }
 
-.calendar-day-container, .calendar-header-day {
-    width: var(--day-container-width);
+.calendar-day-container,
+.calendar-header-day {
+  width: var(--day-container-width);
 }
 
 .calendar-header {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .calendar-header h2 {
-    font-size: 0.8rem;
-    font-weight: 400;
-    text-align: center;
-    height: 1.5rem;
-    padding: 0 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-align: center;
+  height: 1.5rem;
+  padding: 0 0.2rem;
 }
 
 .calendar-day {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: var(--day-container-width);
-    padding: 0 var(--day-padding);
-    outline: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--day-container-width);
+  padding: 0 var(--day-padding);
+  outline: 1px solid var(--border);
 }
 
 .calendar-day-divider:not(:first-child) {
-    border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border);
 }
 
 .calendar-week-header-spacer {
-    height: 2.8rem;
+  height: 2.8rem;
 }
 
 .calendar-week-hour-label {
-    text-align: right;
-    height: var(--hour-height);
-    color: var(--foreground-1);
-    padding-right: 1ch;
-    font-size: 0.8rem;
-    font-variant-numeric: tabular-nums;
+  text-align: right;
+  height: var(--hour-height);
+  color: var(--foreground-1);
+  padding-right: 1ch;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .calendar-day-divider {
-    height: var(--hour-height);
-    background-color: var(--background);
-    width: var(--day-container-width);
+  height: var(--hour-height);
+  background-color: var(--background);
+  width: var(--day-container-width);
 }
 
 .calendar-day-divider.outside-con {
-    background: var(--background-1);
+  background: var(--background-1);
 }
 
 .calendar-day-divider.past {
-    background: var(--background-2);
+  background: var(--background-2);
 }
 
 .event {
-    --my-width: calc(var(--day-width) / (var(--concurrent-with) + 1));  /* if concurrent with 2, should have half the day width, etc */
-    --border-radius: 0.375rem;
-    position: absolute;
+  --my-width: calc(
+    var(--day-width) / (var(--concurrent-with) + 1)
+  ); /* if concurrent with 2, should have half the day width, etc */
+  --border-radius: 0.375rem;
+  position: absolute;
 
-    height: calc(var(--hour-height) * var(--event-duration));
-    top: calc(var(--hour-height) * var(--event-start));
-    
-    width: var(--my-width);
-    left: calc(var(--my-width) * var(--concurrent-index));
+  height: calc(var(--hour-height) * var(--event-duration));
+  top: calc(var(--hour-height) * var(--event-start));
 
-    max-width: var(--day-container-width);
+  width: var(--my-width);
+  left: calc(var(--my-width) * var(--concurrent-index));
 
-    overflow: hidden;
+  max-width: var(--day-container-width);
 
-    transition: left 0.2s var(--modal-transition-timing), width 0.2s var(--modal-transition-timing), box-shadow 0.2s var(--modal-transition-timing);
+  overflow: hidden;
 
-    padding: 0.1rem;
-    line-height: 1rem;
+  transition:
+    left 0.2s var(--modal-transition-timing),
+    width 0.2s var(--modal-transition-timing),
+    box-shadow 0.2s var(--modal-transition-timing);
+
+  padding: 0.1rem;
+  line-height: 1rem;
 }
 
 .event:not(.started-yesterday) {
-    border-top-left-radius: var(--border-radius);
-    border-top-right-radius: var(--border-radius);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
 }
 
 .event:not(.ends-tomorrow) {
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
 }
 
 .event.current {
-    background-color: var(--current);
-    --shadow-color: var(--current-shadow);
+  background-color: var(--current);
+  --shadow-color: var(--current-shadow);
 }
 
 .event.running {
-    background-color: var(--running);
-    --shadow-color: var(--running-shadow);
+  background-color: var(--running);
+  --shadow-color: var(--running-shadow);
 }
 
 .event.entered {
-    background-color: var(--entered);
-    --shadow-color: var(--entered-shadow);
+  background-color: var(--entered);
+  --shadow-color: var(--entered-shadow);
 }
+
+.event.accepted {
+    background-color: var(--accepted);
+    --shadow-color: var(--accepted-shadow);
+  }
 
 .event.other {
-    background-color: var(--other);
-    --shadow-color: var(--other-shadow);
+  background-color: var(--other);
+  --shadow-color: var(--other-shadow);
 }
 
-.event:hover, .event.focused {
-    z-index: 1000;
-    left: 0;
-    width: var(--day-width);
+.event:hover,
+.event.focused {
+  z-index: 1000;
+  left: 0;
+  width: var(--day-width);
 
-    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+  box-shadow:
+    0 10px 15px -3px var(--shadow-color),
+    0 4px 6px -4px var(--shadow-color);
 }
 
 .calendar-week-container {
-    height: calc(12 * var(--hour-height));
-    overflow-y: scroll;
+  height: calc(12 * var(--hour-height));
+  overflow-y: scroll;
 }
 
 .under-min-count {
-    text-decoration: var(--accent-red) wavy underline;
-  }
-  
+  text-decoration: var(--accent-red) wavy underline;
+}
+
 .color-example {
-    font-weight: 500;
-    color: var(--example-color);
+  font-weight: 500;
+  color: var(--example-color);
 }
 .color-example::before {
-    content: " ";
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    margin-right: 0.5rem;
-    border-radius: 50%;
-    background-color: var(--example-color);
+  content: " ";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--example-color);
 }
 .color-example.current {
-    --example-color: var(--current);
+  --example-color: var(--current);
 }
 .color-example.running {
-    --example-color: var(--running);
+  --example-color: var(--running);
 }
 .color-example.entered {
-    --example-color: var(--entered);
+  --example-color: var(--entered);
+}
+.color-example.accepted {
+  --example-color: var(--accepted);
 }
 .color-example.other {
-    --example-color: var(--other);
+  --example-color: var(--other);
 }
