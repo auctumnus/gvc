@@ -1,0 +1,6 @@
+<main>
+    <h1>Delete <%= game.name %>?</h1>
+    <form method="post" action="/games/<%= game.slug %>/delete">
+        <input type="submit" value="Confirm" />
+    </form>
+</main>

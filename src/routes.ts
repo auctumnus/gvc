@@ -618,6 +618,43 @@ router.post("/games/:slug/edit", organizerOnly, (req, res) => {
   res.redirect(`/games/${slug}`);
 });
 
+router.get("/games/:slug/delete", organizerOnly, (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  if (req.session.user!.id !== game.organizer) {
+    res.status(403).send("You are not the organizer of this game.");
+    return;
+  }
+
+  res.view("delete-game", { game });
+})
+
+router.post("/games/:slug/delete", organizerOnly, (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  if (req.session.user!.id !== game.organizer) {
+    res.status(403).send("You are not the organizer of this game.");
+    return;
+  }
+
+  db.prepare("delete from games where id = $id").run({ id: game.id });
+  res.redirect("/games");
+})
+
 router.get("/games/:slug/times", organizerOnly, (req, res) => {
   const game = db
     .prepare("select * from games where slug = $slug")

@@ -33,7 +33,7 @@ create table games (
     created_at integer not null default (unixepoch()),
 
 
-    foreign key(organizer) references users(id)
+    foreign key(organizer) references users(id) on delete cascade
 );
 
 create table game_times (
@@ -45,7 +45,7 @@ create table game_times (
 
     created_at integer not null default (unixepoch()),
 
-    foreign key(game) references games(id)
+    foreign key(game) references games(id) on delete cascade
 );
 
 create table entries (
@@ -60,8 +60,8 @@ create table entries (
     created_at integer not null default (unixepoch()),
 
 
-    foreign key(game_time) references game_times(id),
-    foreign key(user) references users(id)
+    foreign key(game_time) references game_times(id) on delete cascade,
+    foreign key(user) references users(id) on delete cascade
 );
 
 create table sessions (
@@ -73,5 +73,5 @@ create table sessions (
 
     created_at integer not null default (unixepoch()),
 
-    foreign key(user_id) references users(id)
+    foreign key(user_id) references users(id) on delete cascade
 );

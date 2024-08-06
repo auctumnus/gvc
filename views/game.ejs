@@ -86,4 +86,7 @@
     </table>
     <div class="not-prose" id="app"></div>
     <% } %>
+    <% if(user && (user.discord_id === organizer.discord_id)) { %>
+        <a href="/games/<%= game.slug %>/delete">Delete game</a>
+    <% } %>
 </main>

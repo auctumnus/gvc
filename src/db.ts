@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { DB_FILE } from "./constants";
 
 export const db = new Database(DB_FILE);
+db.pragma('foreign_keys = ON');
 
 export interface DatabaseUser {
   id: number;
@@ -39,5 +40,14 @@ export interface DatabaseGameTime {
   start: number;
   end: number;
 
+  created_at: number;
+}
+
+export interface DatabaseEntry {
+  id: number;
+  game_time: number;
+  user: number;
+  priority: number;
+  accepted: boolean;
   created_at: number;
 }
