@@ -24,28 +24,83 @@
             <input type="submit" value="Search"></input>
         </form>
     </details>
-
-    <% if (games.length === 0) { %>
-        <p>No games <%= hasFilter ? 'found while using this filter' : '' %> :(</p>
-    <% } else { %>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Summary</th>
-                    <th>Organizer</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% games.forEach(({ game }) => { %>
-                    <tr>
-                        <td><a href="/games/<%= game.slug %>"><%= game.name %></a></td>
-                        <td><%= game.summary %></td>
-                        <td><%- include("inline-user", game.organizer) %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    <% } %>
     
+    <div class="games-container">
+
+        <% if (games.length === 0) { %>
+            <p>No games <%= hasFilter ? 'found while using this filter' : '' %> :(</p>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Summary</th>
+                        <th>Organizer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% games.forEach(({ game }) => { %>
+                        <tr>
+                            <td><a href="/games/<%= game.slug %>"><%= game.name %></a></td>
+                            <td class="summary"><%= game.summary %></td>
+                            <td><%- include("inline-user", game.organizer) %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+
+        <% if (numPages > 1) { %>
+        <div class="pages-container">
+            <span>Page <%= page %> of <%= numPages %></span>
+            <nav class="pages">
+                <ul>
+                    <li><a class="button" <%- isFirstPage ? 'disabled' : `href="/games?page=1${filterString}"` %>>First</a></li>
+                    <li><a class="button secondary" <%- isFirstPage ? 'disabled' : `href="/games?page=${prevPage}${filterString}"` %>>Previous</a></li>
+                    <li><a class="button secondary" <%- isLastPage ? 'disabled' : `href="/games?page=${nextPage}${filterString}"` %>>Next</a></li>
+                    <li><a class="button"  <%- isLastPage ? 'disabled' : `href="/games?page=${lastPage}${filterString}"` %>>Last</a></li>
+                </ul>
+            </nav>
+        </div>
+        <% } %>
+    </div>
 </main>
+
+<style>
+    table {
+        max-width: max-content;
+    }
+    div.pages-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    nav.pages {
+        display: flex;
+        flex-direction: row;
+        margin-top: 1rem;
+    }
+    nav.pages ul {
+        list-style: none;
+    }
+    nav.pages ul {
+        display: flex;
+        flex-direction: row;
+        padding: 0;
+    }
+    nav.pages ul li {
+        margin: 0 0.5rem;
+    }
+    div.games-container {
+        display: grid;
+        grid-template-columns: max-content;
+        grid-template-rows: auto auto;
+    }
+
+    .summary {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 50ch;
+    }
+</style>

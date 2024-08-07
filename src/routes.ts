@@ -281,9 +281,6 @@ router.get("/games", (req, res) => {
     }
   })();
 
-  console.log("q", JSON.stringify(req.query));
-  console.log("f", JSON.stringify(filter));
-
   const userID = req.session.user?.id;
 
   if (!userID) {
@@ -349,12 +346,35 @@ router.get("/games", (req, res) => {
       },
     }));
 
-  const lastPage = Math.ceil(total_games / 10);
+  const GAMES_PER_PAGE = 10;
+  const lastPage = Math.ceil(total_games / GAMES_PER_PAGE);
   const pagesLeft = lastPage - page;
   const isFirstPage = page === 1;
   const isLastPage = pagesLeft === 0;
   const nextPage = isLastPage ? null : page + 1;
   const prevPage = isFirstPage ? null : page - 1;
+  const numPages = lastPage; // same calculation
+
+  const filterString = (() => {
+    const f = {
+      ...filter,
+      content_warnings: filter.content_warnings?.join(","),
+    }
+    for(const key of Object.keys(f)) {
+      if (f[key] === undefined) {
+        delete f[key];
+      } else if(typeof f[key] === 'boolean') {
+        f[key] = f[key].toString();
+      }
+    }
+    if (hasFilter) {
+      // @ts-ignore
+      return `&${new URLSearchParams(f).toString()}`;
+    } else {
+      return "";
+    }
+  })()
+
   res.view("games", {
     games,
     page,
@@ -366,6 +386,8 @@ router.get("/games", (req, res) => {
     isLastPage,
     filter,
     hasFilter,
+    numPages,
+    filterString
   });
 });
 
