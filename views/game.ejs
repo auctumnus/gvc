@@ -37,7 +37,7 @@
     <% if(user && (user.discord_id === organizer.discord_id)) { %>
         <p>You are running this game.</p>
         <a class="button" href="/games/<%= game.slug %>/edit">Edit</a>
-        <a class="button" href="/games/<%= game.slug %>/times">Add times</a>
+        <a class="button" href="/games/<%= game.slug %>/times">Game times</a>
     <% } else { %>
         <div class="not-prose">Run by <%- include("inline-user", organizer) %></div>
     <% } %>
