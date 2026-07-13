@@ -54,13 +54,16 @@ const styles = computed(() => ({
 }));
 const underMin = computed(() => event.value.entries_count! < data.minPlayers);
 
-const accessibleLabel = computed(
-  () =>
-    `${event.value.entries_count} out of ${data.maxPlayers}${underMin ? " (under minimum)" : ""}`,
+const accessibleLabel = computed(() =>
+  event.value.kind === "running"
+    ? `${event.value.entries_count} out of ${data.maxPlayers}${underMin ? " (under minimum)" : ""}`
+    : `Max players is ${data.maxPlayers}`,
 );
 
-const readableLabel = computed(
-  () => `${event.value.entries_count}/${data.maxPlayers}${underMin ? "*" : ""}`,
+const readableLabel = computed(() =>
+  event.value.kind === "running"
+    ? `${event.value.entries_count}/${data.maxPlayers}${underMin ? "*" : ""}`
+    : `?/${data.maxPlayers}`,
 );
 
 const eventModalVisible = ref(false);

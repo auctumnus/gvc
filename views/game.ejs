@@ -68,17 +68,25 @@
         <thead>
             <tr>
                 <th>Time</th>
-                <th>Players</th>
+                <% if(user && (user.discord_id === organizer.discord_id)) { %>
+                    <th>Players</th>
+                <% } else { %>
+                    <th>Maximum players</th>
+                <% } %>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             <% currentGameTimes.forEach(gt => { %>
-                <tr class="<% if(gt.entries_count >= game.max_players) {%>full<% } %> <% if(gt.entered) { %> entered <% } %>" id="game-time-<%= gt.id %>">
+                <tr class="<% if(gt.entered) { %> entered <% } %>" id="game-time-<%= gt.id %>">
                     <td><display-time start="<%= gt.start %>" end="<%= gt.end %>">
                         <%= new Date(gt.start) %> - <%= new Date(gt.end) %>
                     </display-time></td>
-                    <td><%= gt.entries_count %>/<%= game.max_players %></td>
+                    <% if(user && (user.discord_id === organizer.discord_id)) { %>
+                        <td><%= gt.entries_count %>/<%= game.max_players %></td>
+                    <% } else { %>
+                        <td><%= game.max_players %></td>
+                    <% } %>
                     <% if(gt.entered) { %>
                         <td><a href="/games/<%= game.slug %>/times/<%= gt.id %>/edit-entry">Edit</a> or <a href="/games/<%= game.slug %>/times/<%= gt.id %>/remove-entry">remove</a></td>
                     <% } else { %>
