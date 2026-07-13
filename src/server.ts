@@ -20,6 +20,9 @@ app.set("views", VIEWS_DIR);
 
 app.use(express.static(STATIC_DIR));
 app.use(logger());
+// Caddy terminates TLS in front of us; without this, express-session
+// sees plain http and refuses to set secure cookies in prod
+app.set("trust proxy", 1);
 app.use(
   session({
     secret: COOKIE_SECRET!, // safety: if not defined, `constants.ts` throws an error
