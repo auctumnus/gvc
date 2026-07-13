@@ -27,16 +27,16 @@ if (!COOKIE_SECRET) {
 }
 
 if (!process.env.START_OF_CON) {
-  console.error('no start time set, assuming "2024-08-09T00:00:00Z"');
+  console.error('no start time set, assuming "2025-08-29T00:00:00Z"');
 }
 
 if (!process.env.END_OF_CON) {
-  console.error('no end time set, assuming "2024-08-18T23:59:59Z"');
+  console.error('no end time set, assuming "2025-09-02T04:00:00Z"');
 }
 
 export const START_OF_CON = new Date(
-  process.env.START_OF_CON || "2024-08-09T00:00:00Z",
+  process.env.START_OF_CON || "2025-08-29T00:00:00Z",
 );
 export const END_OF_CON = new Date(
-  process.env.END_OF_CON || "2024-08-18T23:59:59Z",
+  process.env.END_OF_CON || "2025-09-02T04:00:00Z",
 );
