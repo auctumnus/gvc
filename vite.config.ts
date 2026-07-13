@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [vue()],
   build: {
     rollupOptions: {
@@ -17,8 +17,8 @@ export default defineConfig({
         entryFileNames: "[name].js",
       },
     },
-    watch: {
-      include: "vue/**",
-    },
+    // only watch in `npm run watch` (--mode development); a bare
+    // `vite build` should run once and exit
+    watch: mode === "development" ? { include: "vue/**" } : null,
   },
-});
+}));
