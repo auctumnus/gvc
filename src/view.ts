@@ -14,7 +14,7 @@ export const render = (
     authorized,
     user: authorized ? req.session.user : null,
     organizer: req.session.user?.organizer || false,
-    admin: req.session.user?.organizer || false,
+    admin: req.session.user?.admin || false,
     login_url: DISCORD_OAUTH_URL,
     START_OF_CON: START_OF_CON,
     END_OF_CON: END_OF_CON,

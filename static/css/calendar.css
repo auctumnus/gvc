@@ -16,8 +16,10 @@
   --day-padding: 0.1rem;
   --week-header-width: 4rem;
   --margin-around-main: 48px;
+  --days-in-view: 7;
   --day-container-width: calc(
-    (100vw - var(--week-header-width) - var(--margin-around-main)) / 7
+    (100vw - var(--week-header-width) - var(--margin-around-main)) /
+      var(--days-in-view)
   );
   --day-width: calc(var(--day-container-width) - (2 * var(--day-padding)));
   --hour-height: 3rem;
@@ -43,7 +45,9 @@
     left: -24px;
 
     --margin-around-main: 0;
-    --day-container-width: calc(((100vw - var(--week-header-width)) / 7));
+    --day-container-width: calc(
+      ((100vw - var(--week-header-width)) / var(--days-in-view))
+    );
   }
 
   .event {
@@ -71,7 +75,7 @@
 .calendar-week {
   display: grid;
   grid-template-columns: var(--week-header-width) repeat(
-      7,
+      var(--days-in-view),
       var(--day-container-width)
     );
   grid-template-rows: auto auto;
@@ -192,9 +196,9 @@
 }
 
 .event.accepted {
-    background-color: var(--accepted);
-    --shadow-color: var(--accepted-shadow);
-  }
+  background-color: var(--accepted);
+  --shadow-color: var(--accepted-shadow);
+}
 
 .event.other {
   background-color: var(--other);

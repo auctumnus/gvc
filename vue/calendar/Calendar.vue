@@ -8,12 +8,7 @@ import { computed, ComputedRef, ref } from "vue";
 import { endOfDay } from "date-fns/endOfDay";
 import CalendarDay from "./CalendarDay.vue";
 import { EventT } from "./types";
-import { startOfWeek } from "date-fns/startOfWeek";
-import { differenceInDays } from "date-fns/differenceInDays";
-import { endOfWeek } from "date-fns/endOfWeek";
 import CalendarWeek from "./CalendarWeek.vue";
-import { subDays } from "date-fns/subDays";
-import { addDays } from "date-fns/addDays";
 import CalendarHeader from "./CalendarHeader.vue";
 import HelpModal from "./HelpModal.vue";
 
@@ -116,22 +111,11 @@ const eventsPerDay = computed(() =>
   })),
 );
 
-const alignedToWeeks = computed(() => [
-  ...eachDayOfInterval({
-    start: startOfWeek(startOfCon.value),
-    end: subDays(startOfCon.value, 1),
-  }).map((d) => ({ day: d, events: [] })),
-  ...eventsPerDay.value,
-  ...eachDayOfInterval({
-    start: addDays(endOfCon.value, 1),
-    end: endOfWeek(endOfCon.value),
-  }).map((d) => ({ day: d, events: [] })),
-]);
-
+// only show the days of the con itself, paginated if it runs longer than a week
 const DAYS_IN_WEEK = 7;
 
 const weeks = computed(() =>
-  alignedToWeeks.value.reduce(
+  eventsPerDay.value.reduce(
     (weeks, day, i) => {
       const weekIndex = Math.floor(i / DAYS_IN_WEEK);
       if (!weeks[weekIndex]) {
@@ -150,19 +134,23 @@ const lastWeek = computed(() => weeks.value.length - 1);
 const firstDayOfCurrentWeek = computed(
   () => weeks.value[currentWeek.value][0].day,
 );
-const lastDayOfCurrentWeek = computed(
-  () => weeks.value[currentWeek.value][DAYS_IN_WEEK - 1].day,
-);
+const lastDayOfCurrentWeek = computed(() => {
+  const week = weeks.value[currentWeek.value];
+  return week[week.length - 1].day;
+});
 
 const helpModalShown = ref(false);
 </script>
 
 <template>
-  <div class="calendar">
+  <div
+    class="calendar"
+    :style="{ '--days-in-view': weeks[currentWeek].length }"
+  >
     <div class="calendar-help-container">
       <button class="link" @click="helpModalShown = true">Calendar help</button>
     </div>
-    <div class="calendar-controls">
+    <div class="calendar-controls" v-if="weeks.length > 1">
       <button @click="currentWeek--" :disabled="currentWeek === 0">
         Previous
       </button>

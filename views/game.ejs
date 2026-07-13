@@ -37,9 +37,13 @@
     <% if(user && (user.discord_id === organizer.discord_id)) { %>
         <p>You are running this game.</p>
         <a class="button" href="/games/<%= game.slug %>/edit">Edit</a>
+        <a class="button" href="/games/<%= game.slug %>/players">Players</a>
         <a class="button" href="/games/<%= game.slug %>/times">Game times</a>
     <% } else { %>
         <div class="not-prose">Run by <%- include("inline-user", organizer) %></div>
+        <% if(user && user.admin) { %>
+            <a class="button" href="/games/<%= game.slug %>/players">Players</a>
+        <% } %>
     <% } %>
     <% if (game.content_warnings.length || game.custom_content_warnings) { %>
         <h2>Content warnings</h2>

@@ -1,0 +1,35 @@
+<script src="/js/display-time.js" type="module"></script>
+<main class="prose">
+    <h1>Players for <%= game.name %></h1>
+    <p><a href="/games/<%= game.slug %>">Back to game page</a></p>
+    <noscript>Times in UTC.</noscript>
+    <% if (times.length === 0) { %>
+        <p>No times have been added for this game yet.</p>
+    <% } %>
+    <% times.forEach(gt => { %>
+        <h2><display-time start="<%= gt.start %>" end="<%= gt.end %>">
+            <%= new Date(gt.start) %> - <%= new Date(gt.end) %>
+        </display-time></h2>
+        <p><%= gt.entries.length %>/<%= game.max_players %> players, <%= gt.entries.filter(e => e.accepted).length %> accepted</p>
+        <% if (gt.entries.length !== 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Priority</th>
+                        <th>Accepted?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% gt.entries.forEach(entry => { %>
+                        <tr>
+                            <td class="not-prose"><%- include("inline-user", entry.user) %></td>
+                            <td><%= entry.priority %></td>
+                            <td><%= entry.accepted ? "Yes" : "No" %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+    <% }) %>
+</main>

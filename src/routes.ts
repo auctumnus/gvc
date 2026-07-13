@@ -359,11 +359,11 @@ router.get("/games", (req, res) => {
     const f = {
       ...filter,
       content_warnings: filter.content_warnings?.join(","),
-    }
-    for(const key of Object.keys(f)) {
+    };
+    for (const key of Object.keys(f)) {
       if (f[key] === undefined) {
         delete f[key];
-      } else if(typeof f[key] === 'boolean') {
+      } else if (typeof f[key] === "boolean") {
         f[key] = f[key].toString();
       }
     }
@@ -373,7 +373,7 @@ router.get("/games", (req, res) => {
     } else {
       return "";
     }
-  })()
+  })();
 
   res.view("games", {
     games,
@@ -387,7 +387,7 @@ router.get("/games", (req, res) => {
     filter,
     hasFilter,
     numPages,
-    filterString
+    filterString,
   });
 });
 
@@ -526,6 +526,68 @@ router.get("/games/:slug", (req, res) => {
   });
 });
 
+router.get("/games/:slug/players", authenticated, (req, res) => {
+  const game = db
+    .prepare("select * from games where slug = $slug")
+    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const user = req.session.user!; // safety: covered by authenticated
+
+  if (user.id !== game.organizer && !user.admin) {
+    res.status(403).send("You are not the organizer of this game.");
+    return;
+  }
+
+  const gameTimes = db
+    .prepare("select * from game_times where game = $gameID order by start asc")
+    .all({ gameID: game.id }) as DatabaseGameTime[];
+
+  const entries = (
+    db
+      .prepare(
+        `
+      select
+        entries.*,
+        users.discord_id as users_id,
+        users.username as users_username,
+        users.display_name as users_display_name,
+        users.avatar as users_avatar
+      from entries
+      inner join game_times on entries.game_time = game_times.id
+      inner join users on entries.user = users.id
+      where game_times.game = $gameID
+      order by entries.accepted desc, entries.priority desc
+    `,
+      )
+      .all({ gameID: game.id }) as (DatabaseEntry & {
+      users_id: string;
+      users_username: string;
+      users_display_name: string;
+      users_avatar: string;
+    })[]
+  ).map((e) => ({
+    ...e,
+    user: {
+      discord_id: e.users_id,
+      username: e.users_username,
+      display_name: e.users_display_name,
+      avatar: e.users_avatar,
+    },
+  }));
+
+  const times = gameTimes.map((gt) => ({
+    ...gt,
+    entries: entries.filter((e) => e.game_time === gt.id),
+  }));
+
+  res.view("players", { title: `Players for ${game.name}`, game, times });
+});
+
 const filterTo = (allowed: string[]) => (arr: string[]) =>
   arr.filter((x) => allowed.includes(x));
 
@@ -656,7 +718,7 @@ router.get("/games/:slug/delete", organizerOnly, (req, res) => {
   }
 
   res.view("delete-game", { game });
-})
+});
 
 router.post("/games/:slug/delete", organizerOnly, (req, res) => {
   const game = db
@@ -675,7 +737,7 @@ router.post("/games/:slug/delete", organizerOnly, (req, res) => {
 
   db.prepare("delete from games where id = $id").run({ id: game.id });
   res.redirect("/games");
-})
+});
 
 router.get("/games/:slug/times", organizerOnly, (req, res) => {
   const game = db
@@ -1001,10 +1063,21 @@ router.get("/games/:slug/times/:time/entries", organizerOnly, (req, res) => {
     return;
   }
 
-  const userID = req.session.user?.id;
+  const user = req.session.user!; // safety: covered by organizerOnly
 
-  if (!userID) {
-    res.status(403).send("You are not logged in.");
+  if (user.id !== game.organizer && !user.admin) {
+    res.status(403).send("You are not the organizer of this game.");
+    return;
+  }
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID: game.id }) as
+    | DatabaseGameTime
+    | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
     return;
   }
 
@@ -1043,60 +1116,77 @@ router.get("/games/:slug/times/:time/entries", organizerOnly, (req, res) => {
   res.send(JSON.stringify(entries));
 });
 
-router.patch("/games/:slug/times/:time/entries/:entry", organizerOnly, (req, res) => {
-  const game = db
-    .prepare("select * from games where slug = $slug")
-    .get({ slug: req.params.slug }) as DatabaseGame | undefined;
+router.patch(
+  "/games/:slug/times/:time/entries/:entry",
+  organizerOnly,
+  (req, res) => {
+    const game = db
+      .prepare("select * from games where slug = $slug")
+      .get({ slug: req.params.slug }) as DatabaseGame | undefined;
 
-  if (!game) {
-    res.status(404).send("Game not found");
-    return;
-  }
+    if (!game) {
+      res.status(404).send("Game not found");
+      return;
+    }
 
-  const userID = req.session.user?.id;
+    const user = req.session.user!; // safety: covered by organizerOnly
 
-  if (!userID) {
-    res.status(403).send("You are not logged in.");
-    return;
-  }
+    if (user.id !== game.organizer && !user.admin) {
+      res.status(403).send("You are not the organizer of this game.");
+      return;
+    }
 
-  const entry = db
-    .prepare(
-      `
+    const game_time = db
+      .prepare("select * from game_times where id = $id and game = $gameID")
+      .get({ id: req.params.time, gameID: game.id }) as
+      | DatabaseGameTime
+      | undefined;
+
+    if (!game_time) {
+      res.status(404).send("Game time not found");
+      return;
+    }
+
+    const entry = db
+      .prepare(
+        `
     select * from entries where id = $entry and game_time = $time
   `,
-    )
-    .get({ entry: req.params.entry, time: req.params.time }) as DatabaseEntry | undefined;
+      )
+      .get({ entry: req.params.entry, time: req.params.time }) as
+      | DatabaseEntry
+      | undefined;
 
-  if (!entry) {
-    res.status(404).send("Entry not found");
-    return;
-  }
+    if (!entry) {
+      res.status(404).send("Entry not found");
+      return;
+    }
 
-  const result = z
-    .object({
-      accepted: z.boolean(),
-    })
-    .safeParse(req.body);
+    const result = z
+      .object({
+        accepted: z.boolean(),
+      })
+      .safeParse(req.body);
 
-  if (!result.success) {
-    res.status(400).send(toErrorMessage(result.error));
-    return;
-  }
+    if (!result.success) {
+      res.status(400).send(toErrorMessage(result.error));
+      return;
+    }
 
-  db.prepare(
-    `
+    db.prepare(
+      `
     update entries set
       accepted = $accepted
     where id = $entry
   `,
-  ).run({
-    entry: req.params.entry,
-    accepted: result.data.accepted ? 1 : 0,
-  });
+    ).run({
+      entry: req.params.entry,
+      accepted: result.data.accepted ? 1 : 0,
+    });
 
-  res.sendStatus(200);
-})
+    res.sendStatus(200);
+  },
+);
 
 router.get("/games/:slug/times/:time/add-entry", (req, res) => {
   const game = db
@@ -1174,11 +1264,13 @@ router.post("/games/:slug/times/:time/entries", (req, res) => {
     select * from entries where user = $user and game_time = $game_time
   `,
     )
-    .get({ user: userID, game_time: req.params.time }) as DatabaseEntry | undefined;
+    .get({ user: userID, game_time: req.params.time }) as
+    | DatabaseEntry
+    | undefined;
 
   if (existingEntry) {
     res.status(400).send("You already have an entry for this game time.");
-    return
+    return;
   }
 
   db.prepare(
@@ -1237,7 +1329,7 @@ router.get("/games/:slug/times/:time/edit-entry", (req, res) => {
   }
 
   res.view("edit-entry", { game, gt: game_time, entry, error: false });
-})
+});
 
 router.post("/games/:slug/times/:time/edit-entry", (req, res) => {
   const game = db
@@ -1304,99 +1396,99 @@ router.post("/games/:slug/times/:time/edit-entry", (req, res) => {
   });
 
   res.redirect(`/games/${req.params.slug}`);
-})
+});
 
 router.post("/games/:slug/times/:time/remove-entry", (req, res) => {
   const game = db
     .prepare("select * from games where slug = $slug")
     .get({ slug: req.params.slug }) as DatabaseGame | undefined;
 
-  
-    if (!game) {
-      res.status(404).send("Game not found");
-      return;
-    }
-  
-    const userID = req.session.user?.id;
-  
-    if (!userID) {
-      res.status(403).send("You are not logged in.");
-      return;
-    }
-  
-    const gameID = game.id;
-  
-    const game_time = db
-      .prepare("select * from game_times where id = $id and game = $gameID")
-      .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
-  
-    if (!game_time) {
-      res.status(404).send("Game time not found");
-      return;
-    }
-  
-    const entry = db
-      .prepare(
-        `
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  const entry = db
+    .prepare(
+      `
       select * from entries where user = $userID and game_time = $time
     `,
-      )
-      .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
-  
-    if (!entry) {
-      res.status(404).send("Entry not found");
-      return;
-    }
-  
-    db.prepare("delete from entries where user = $userID and game_time = $time").run({ userID, time: req.params.time });
-  
-    res.redirect(`/games/${req.params.slug}`);
-})
+    )
+    .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+
+  if (!entry) {
+    res.status(404).send("Entry not found");
+    return;
+  }
+
+  db.prepare(
+    "delete from entries where user = $userID and game_time = $time",
+  ).run({ userID, time: req.params.time });
+
+  res.redirect(`/games/${req.params.slug}`);
+});
 
 router.get("/games/:slug/times/:time/remove-entry", (req, res) => {
   const game = db
     .prepare("select * from games where slug = $slug")
     .get({ slug: req.params.slug }) as DatabaseGame | undefined;
 
-  
-    if (!game) {
-      res.status(404).send("Game not found");
-      return;
-    }
-  
-    const userID = req.session.user?.id;
-  
-    if (!userID) {
-      res.status(403).send("You are not logged in.");
-      return;
-    }
-  
-    const gameID = game.id;
-  
-    const game_time = db
-      .prepare("select * from game_times where id = $id and game = $gameID")
-      .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
-  
-    if (!game_time) {
-      res.status(404).send("Game time not found");
-      return;
-    }
-  
-    const entry = db
-      .prepare(
-        `
+  if (!game) {
+    res.status(404).send("Game not found");
+    return;
+  }
+
+  const userID = req.session.user?.id;
+
+  if (!userID) {
+    res.status(403).send("You are not logged in.");
+    return;
+  }
+
+  const gameID = game.id;
+
+  const game_time = db
+    .prepare("select * from game_times where id = $id and game = $gameID")
+    .get({ id: req.params.time, gameID }) as DatabaseGameTime | undefined;
+
+  if (!game_time) {
+    res.status(404).send("Game time not found");
+    return;
+  }
+
+  const entry = db
+    .prepare(
+      `
       select * from entries where user = $userID and game_time = $time
     `,
-      )
-      .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
-  
-    if (!entry) {
-      res.status(404).send("Entry not found");
-      return;
-    }
-  
-    res.view("remove-entry", { game, gt: game_time, entry, error: false });
-})
+    )
+    .get({ userID, time: req.params.time }) as DatabaseEntry | undefined;
+
+  if (!entry) {
+    res.status(404).send("Entry not found");
+    return;
+  }
+
+  res.view("remove-entry", { game, gt: game_time, entry, error: false });
+});
 
 router.get("/users/:id/promote", adminOnly, (req, res) => {
   const user = db
